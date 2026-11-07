@@ -10,7 +10,28 @@ export interface AssistantMessage {
 }
 
 export const aiAssistantService = {
-  processQuestion(query: string): AssistantMessage {
+  async processQuestion(query: string): Promise<AssistantMessage> {
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: query }),
+      })
+
+      if (res.ok) {
+        const json = await res.json()
+        if (json.success && json.data) {
+          return json.data
+        }
+      }
+    } catch (err) {
+      // Backend call failed or offline; execute local grounded logic
+    }
+
+    return this.fallbackProcessQuestion(query)
+  },
+
+  fallbackProcessQuestion(query: string): AssistantMessage {
     const invoices = invoiceService.getAll()
     const q = query.toLowerCase()
 

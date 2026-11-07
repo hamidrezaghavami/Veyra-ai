@@ -26,6 +26,13 @@ export const authService = {
       })
     )
 
+    // Notify backend
+    fetch('/api/auth/send-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: cleanEmail }),
+    }).catch(() => {})
+
     return { success: true, code }
   },
 

@@ -193,8 +193,8 @@ export function DashboardPage() {
     setChatMessages((prev) => [...prev, userMsg])
     setInputQuery('')
 
-    setTimeout(() => {
-      const response = aiAssistantService.processQuestion(q)
+    setTimeout(async () => {
+      const response = await aiAssistantService.processQuestion(q)
       setChatMessages((prev) => [...prev, response])
     }, 400)
   }

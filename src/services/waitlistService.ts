@@ -31,6 +31,14 @@ export const waitlistService = {
       submittedAt: new Date().toISOString(),
     })
     localStorage.setItem(WAITLIST_KEY, JSON.stringify(entries))
+
+    // Notify backend
+    fetch('/api/waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: cleanEmail }),
+    }).catch(() => {})
+
     return { position, alreadyJoined: false }
   },
 }

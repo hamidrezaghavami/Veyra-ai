@@ -5,15 +5,24 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
+    "dev:backend": "tsx watch src/backend/index.ts",
+    "start:backend": "tsx src/backend/index.ts",
     "build": "vite build",
     "preview": "vite preview"
   },
-  "keywords": ["invoice-auditing", "expense-tracking", "ai", "finance", "automation"],
+  "keywords": [
+    "invoice-auditing",
+    "expense-tracking",
+    "ai",
+    "finance",
+    "automation"
+  ],
   "author": "Veyra AI",
   "license": "MIT",
   "description": "Veyra AI — Invoice & Expense Auditing Platform with automated extraction, anomaly detection, and spend intelligence.",
   "packageManager": "pnpm@12.18.0",
   "dependencies": {
+    "@google/genai": "^3.0.0",
     "@number-flow/react": "^0.6.2",
     "@radix-ui/react-label": "^2.1.17",
     "@radix-ui/react-slot": "^1.5.0",
@@ -24,6 +33,9 @@
     "canvas-confetti": "^1.9.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
     "framer-motion": "^14.10.1",
     "lucide-react": "^1.70.0",
     "react": "^19.3.1",
@@ -33,6 +45,8 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.5",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@types/three": "^0.187.0",
@@ -40,6 +54,7 @@
     "autoprefixer": "^10.6.2",
     "postcss": "^8.5.32",
     "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^8.3.6"
   }

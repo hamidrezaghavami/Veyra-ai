@@ -201,6 +201,22 @@ export const invoiceService = {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(invoices))
   },
 
+  async syncWithBackend(): Promise<InvoiceRecord[]> {
+    try {
+      const res = await fetch('/api/invoices')
+      if (res.ok) {
+        const json = await res.json()
+        if (json.success && Array.isArray(json.data) && json.data.length > 0) {
+          this.saveAll(json.data)
+          return json.data
+        }
+      }
+    } catch (e) {
+      // Background sync failed or offline; local storage continues working
+    }
+    return this.getAll()
+  },
+
   approve(id: string, actor: string = 'Current User'): InvoiceRecord {
     const list = this.getAll()
     const item = list.find((i) => i.id === id)
@@ -217,6 +233,14 @@ export const invoiceService = {
     })
 
     this.saveAll(list)
+
+    // Notify backend
+    fetch(`/api/invoices/${encodeURIComponent(id)}/approve`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ actor }),
+    }).catch(() => {})
+
     return item
   },
 
@@ -235,6 +259,14 @@ export const invoiceService = {
     })
 
     this.saveAll(list)
+
+    // Notify backend
+    fetch(`/api/invoices/${encodeURIComponent(id)}/reject`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason, actor }),
+    }).catch(() => {})
+
     return item
   },
 
@@ -253,6 +285,14 @@ export const invoiceService = {
     })
 
     this.saveAll(list)
+
+    // Notify backend
+    fetch(`/api/invoices/${encodeURIComponent(id)}/flag`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ comment, actor }),
+    }).catch(() => {})
+
     return item
   },
 

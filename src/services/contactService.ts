@@ -30,6 +30,20 @@ export const contactService = {
     }
     list.unshift(record)
     localStorage.setItem(CONTACT_KEY, JSON.stringify(list))
+
+    // Notify backend
+    fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: `${data.firstName} ${data.lastName}`.trim(),
+        email: data.email,
+        company: data.company || '',
+        inquiryType: data.subject,
+        message: data.message,
+      }),
+    }).catch(() => {})
+
     return record
   },
 }

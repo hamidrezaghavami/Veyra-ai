@@ -67,14 +67,55 @@ Every single page and route from the Framer project is fully implemented:
 
 ---
 
+## 🧠 Backend Infrastructure (`src/backend`)
+
+The application is powered by a high-performance backend with **Google Gemini AI** and deterministic financial audit rules:
+
+```
+src/backend/
+├── config/        # Environment & Google Cloud Gemini configurations
+├── gemini/        # Google Gemini AI client (vision OCR & financial chat)
+├── audit/         # Deterministic audit engine (duplicate, math, tax, high-value)
+├── db/            # In-memory and persistent financial ledger store
+├── services/      # Invoices, AI Chat, Analytics, Auth (OTP), Waitlist & Contact
+├── routes/        # REST API endpoints (/api/invoices, /api/chat, /api/analytics, etc.)
+├── vitePlugin.ts  # Vite middleware plugin: auto-mounts /api directly in dev server
+└── index.ts       # Standalone Node.js Express server runner
+```
+
+### 🤖 Gemini AI Features:
+- **Vision Document Ingestion:** Extracts vendors, line items, taxes, currency, and totals with confidence scoring.
+- **Grounded Financial Assistant:** Conversational AI chat grounded in active ledger records, spend categories, and audit flags.
+- **Dual-Layer Audit Engine:**
+  1. *Duplicate Detection:* Flags identical invoice numbers or duplicate vendor disbursements.
+  2. *Line-Item Reconciliation:* Verifies `sum(lineItems) == subtotal`.
+  3. *Tax Rate Consistency:* Validates expected tax against document billing.
+  4. *High-Value Spend Thresholds:* Flags transactions exceeding $10,000 for dual executive sign-off.
+
+### 🌐 REST API Endpoints:
+- `GET /api/health` — Backend health & Gemini AI status
+- `GET /api/invoices` — List invoices with query filtering (status, category, search)
+- `GET /api/invoices/:id` — Single invoice record with audit history
+- `POST /api/invoices/upload-and-audit` — Ingest document & run full Gemini OCR audit
+- `PATCH /api/invoices/:id/approve` — Approve invoice for AP disbursement
+- `PATCH /api/invoices/:id/reject` — Reject invoice with reason
+- `PATCH /api/invoices/:id/flag` — Flag invoice for human review
+- `PUT /api/invoices/:id` — Correct fields and trigger automatic re-audit
+- `DELETE /api/invoices/:id` — Delete record
+- `POST /api/chat` — Conversational AI Assistant grounded in corporate ledger
+- `GET /api/analytics` — Real-time spend volume, category breakdown & vendor KPIs
+- `POST /api/auth/send-otp` & `POST /api/auth/verify-otp` — Passwordless authentication
+- `POST /api/waitlist` & `POST /api/contact` — Lead ingestion
+
+---
+
 ## 🛠 Tech Stack
 
-* **Framework:** React 19 + TypeScript
+* **Frontend:** React 19 + TypeScript, Tailwind CSS 4, Framer Motion, Lucide Icons
+* **Backend:** Node.js, Express 5, TypeScript, Vite Connect Middleware
+* **AI Engine:** Google Gemini AI (`@google/genai`, `gemini-3.8-flash` / `gemini-flash-latest`)
+* **Package Manager:** pnpm 12
 * **Build Tool:** Vite 8
-* **Styling:** Tailwind CSS 4 + Custom CSS Design Tokens
-* **Motion & Icons:** Framer Motion + Lucide React
-* **State & Persistence:** LocalStorage + Reactive Service Architecture
-* **Typography:** Google Fonts (`Onest`, `Geist Mono`, `Inter`)
 
 ---
 
@@ -84,12 +125,15 @@ Every single page and route from the Framer project is fully implemented:
 # 1. Install dependencies
 pnpm install
 
-# 2. Start local development server
+# 2. Start full-stack development server (Frontend + Backend on http://localhost:3000)
 pnpm dev
 
-# 3. Build for production
+# 3. (Optional) Run standalone backend API server on http://localhost:3001
+pnpm dev:backend
+
+# 4. Build for production
 pnpm build
 
-# 4. Preview production build
+# 5. Preview production build
 pnpm preview
 ```
