@@ -113,31 +113,40 @@ export function DashboardPage() {
 
   // Handle Approve
   const handleApprove = (id: string) => {
-    const approverName = currentUser?.name || 'Finance Controller'
-    invoiceService.approve(id, approverName)
-    reloadInvoices()
-  }
-
-  // Handle Reject
-  const handleReject = (id: string) => {
-    const reason = prompt(
-      'Please enter the rejection reason for the AP audit ledger:',
-      'Disbursement rejected due to policy mismatch / duplicate submission.'
-    )
-    if (reason) {
+    try {
       const approverName = currentUser?.name || 'Finance Controller'
-      invoiceService.reject(id, reason, approverName)
+      invoiceService.approve(id, approverName)
       reloadInvoices()
+    } catch (e) {
+      console.error('Error approving invoice:', e)
     }
   }
 
-  // Handle Flag for Review
-  const handleFlag = (id: string) => {
-    const comment = prompt('Enter a note for the auditing team:', 'Please verify vendor tax ID with procurement.')
-    if (comment) {
+  // Handle Reject - Instant reliable action without browser prompt blockers
+  const handleReject = (id: string, reasonOverride?: string) => {
+    try {
+      const target = invoices.find((i) => i.id === id) || (selectedInvoice?.id === id ? selectedInvoice : null)
+      const defaultReason = target?.flags?.length
+        ? `Disbursement rejected: ${target.flags.map((f) => f.message).join(' | ')}`
+        : 'Disbursement rejected by AP audit due to policy discrepancy.'
+      const reason = reasonOverride || defaultReason
+      const approverName = currentUser?.name || 'Finance Controller'
+      invoiceService.reject(id, reason, approverName)
+      reloadInvoices()
+    } catch (e) {
+      console.error('Error rejecting invoice:', e)
+    }
+  }
+
+  // Handle Flag for Review - Instant reliable action without browser prompt blockers
+  const handleFlag = (id: string, commentOverride?: string) => {
+    try {
+      const comment = commentOverride || 'Flagged for controller review: verification required before disbursement.'
       const approverName = currentUser?.name || 'Finance Controller'
       invoiceService.flagForReview(id, comment, approverName)
       reloadInvoices()
+    } catch (e) {
+      console.error('Error flagging invoice:', e)
     }
   }
 
@@ -1289,31 +1298,57 @@ export function DashboardPage() {
                 )}
 
                 {/* Quick Action Decision Bar */}
-                <div className="space-y-2">
-                  <div className="text-xs font-semibold uppercase tracking-wider text-neutral-400">
-                    Disbursement Decision
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-wider text-neutral-400">
+                    <span>Disbursement Decision</span>
+                    <span className="text-neutral-400 font-normal normal-case">
+                      Status:{' '}
+                      <strong
+                        className={`font-semibold uppercase ${
+                          selectedInvoice.status === 'Approved'
+                            ? 'text-emerald-400'
+                            : selectedInvoice.status === 'Rejected'
+                            ? 'text-rose-400'
+                            : 'text-amber-400'
+                        }`}
+                      >
+                        {selectedInvoice.status}
+                      </strong>
+                    </span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
                     <button
                       onClick={() => handleApprove(selectedInvoice.id)}
-                      className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:opacity-95 text-neutral-950 font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                      className={`py-2.5 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        selectedInvoice.status === 'Approved'
+                          ? 'bg-emerald-500 text-neutral-950 shadow-[0_0_15px_rgba(16,185,129,0.35)] ring-2 ring-emerald-400'
+                          : 'bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-black border border-emerald-500/40'
+                      }`}
                     >
                       <Check className="size-3.5 stroke-[3]" />
-                      <span>Approve</span>
+                      <span>{selectedInvoice.status === 'Approved' ? 'Approved' : 'Approve'}</span>
                     </button>
                     <button
                       onClick={() => handleFlag(selectedInvoice.id)}
-                      className="py-2.5 px-3 rounded-xl bg-[#162035] hover:bg-[#1e2c48] text-amber-300 border border-amber-500/30 font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      className={`py-2.5 px-3 rounded-xl font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        selectedInvoice.status === 'Flagged'
+                          ? 'bg-amber-500 text-neutral-950 shadow-[0_0_15px_rgba(245,158,11,0.35)] ring-2 ring-amber-400'
+                          : 'bg-[#162035] hover:bg-[#1e2c48] text-amber-300 border border-amber-500/30'
+                      }`}
                     >
                       <AlertTriangle className="size-3.5 text-amber-400" />
-                      <span>Flag Note</span>
+                      <span>{selectedInvoice.status === 'Flagged' ? 'Flagged' : 'Flag Note'}</span>
                     </button>
                     <button
                       onClick={() => handleReject(selectedInvoice.id)}
-                      className="py-2.5 px-3 rounded-xl bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30 font-semibold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                      className={`py-2.5 px-3 rounded-xl font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        selectedInvoice.status === 'Rejected'
+                          ? 'bg-rose-500 text-white shadow-[0_0_15px_rgba(244,63,94,0.35)] ring-2 ring-rose-400'
+                          : 'bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/30'
+                      }`}
                     >
-                      <X className="size-3.5" />
-                      <span>Reject</span>
+                      <X className="size-3.5 stroke-[2.5]" />
+                      <span>{selectedInvoice.status === 'Rejected' ? 'Rejected' : 'Reject'}</span>
                     </button>
                   </div>
                 </div>
