@@ -44,3 +44,18 @@ test('analytics separate currencies and exclude rejected category spend',()=>{
  assert.equal(result.find(i=>i.currency==='USD')?.categories.Logistics,100)
  assert.equal(result.find(i=>i.currency==='EUR')?.pending,20)
 })
+
+test('document extraction sends actual bytes and preserves zero tax',async()=>{
+ const originalFetch=globalThis.fetch,oldKey=process.env.GEMINI_API_KEY
+ process.env.GEMINI_API_KEY='test-provider-key'
+ let payload:any
+ const {invoiceNumber,vendor,vendorCategory,issueDate,dueDate,subtotal,taxRate,taxAmount,total,currency,lineItems}=clean
+ const fields={invoiceNumber,vendor,vendorCategory,issueDate,dueDate,subtotal,taxRate,taxAmount,total,currency,lineItems}
+ globalThis.fetch=async (_url,options)=>{payload=JSON.parse(String(options?.body));return new Response(JSON.stringify({candidates:[{content:{parts:[{text:JSON.stringify(fields)}]}}]}),{status:200})}
+ try{
+  const data=Buffer.from('%PDF-actual-document-bytes').toString('base64')
+  const result=await GeminiClient.extractInvoiceData({fileName:'arbitrary.pdf',fileType:'application/pdf',data})
+  assert.equal(payload.contents[0].parts[1].inlineData.data,data)
+  assert.equal(result.fields.taxRate,0);assert.equal(result.fields.taxAmount,0);assert.equal(result.extractedByAI,true)
+ }finally{globalThis.fetch=originalFetch;if(oldKey)process.env.GEMINI_API_KEY=oldKey;else delete process.env.GEMINI_API_KEY}
+})
