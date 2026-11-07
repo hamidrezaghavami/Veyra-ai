@@ -54,6 +54,16 @@ export function DashboardPage() {
   const [uploadSuccessMessage, setUploadSuccessMessage] = useState('')
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
+  // Safety watchdog: auto-clear processing spinner if it ever takes more than 4 seconds
+  useEffect(() => {
+    if (isProcessingUpload) {
+      const timer = setTimeout(() => {
+        setIsProcessingUpload(false)
+      }, 4000)
+      return () => clearTimeout(timer)
+    }
+  }, [isProcessingUpload])
+
   // AI Assistant chat state
   const [chatMessages, setChatMessages] = useState<AssistantMessage[]>([
     {
@@ -169,15 +179,21 @@ export function DashboardPage() {
         }
 
         setTimeout(() => {
-          const record = invoiceService.addInvoice(sample)
-          setIsProcessingUpload(false)
-          setUploadSuccessMessage(
-            `Audited "${file.name}". Evaluated ${record.flags.length} audit anomaly flag(s).`
-          )
-          reloadInvoices()
-          setSelectedInvoice(record)
-          setActiveTab('invoices')
-        }, 800)
+          try {
+            const record = invoiceService.addInvoice(sample)
+            setUploadSuccessMessage(
+              `Audited "${file.name}". Evaluated ${record.flags.length} audit anomaly flag(s).`
+            )
+            reloadInvoices()
+            setSelectedInvoice(record)
+            setActiveTab('invoices')
+          } catch (e) {
+            console.error(e)
+            setUploadSuccessMessage('Error auditing document.')
+          } finally {
+            setIsProcessingUpload(false)
+          }
+        }, 400)
         return
       }
 
@@ -191,114 +207,120 @@ export function DashboardPage() {
       }
 
       setTimeout(() => {
-        let sample: Omit<InvoiceRecord, 'id' | 'flags' | 'auditHistory'>
-        if (sampleType === 'tax_err') {
-          sample = {
-            invoiceNumber: `INV-ERR-${Math.floor(1000 + Math.random() * 9000)}`,
-            vendor: 'Apex Hardware & Global Logistics',
-            vendorCategory: 'Logistics',
-            issueDate: new Date().toISOString().slice(0, 10),
-            dueDate: new Date(Date.now() + 21 * 86400000).toISOString().slice(0, 10),
-            subtotal: 2800.0, // Stated subtotal 2800, but line items sum is 2500!
-            taxRate: 0.08,
-            taxAmount: 350.0, // Stated tax 350, but 8% of 2800 is 224!
-            total: 3150.0,
-            currency: 'USD',
-            fileName: file.name,
-            confidenceScore: 0.94,
-            extractedByAI: true,
-            lineItems: [
-              {
-                id: 'li-1',
-                description: 'Cross-Border Drayage & Container Handling',
-                quantity: 2,
-                unitPrice: 1000.0,
-                total: 2000.0,
-              },
-              {
-                id: 'li-2',
-                description: 'Overnight Warehouse Storage Surcharge',
-                quantity: 1,
-                unitPrice: 500.0,
-                total: 500.0,
-              },
-            ],
+        try {
+          let sample: Omit<InvoiceRecord, 'id' | 'flags' | 'auditHistory'>
+          if (sampleType === 'tax_err') {
+            sample = {
+              invoiceNumber: `INV-ERR-${Math.floor(1000 + Math.random() * 9000)}`,
+              vendor: 'Apex Hardware & Global Logistics',
+              vendorCategory: 'Logistics',
+              issueDate: new Date().toISOString().slice(0, 10),
+              dueDate: new Date(Date.now() + 21 * 86400000).toISOString().slice(0, 10),
+              subtotal: 2800.0, // Stated subtotal 2800, but line items sum is 2500!
+              taxRate: 0.08,
+              taxAmount: 350.0, // Stated tax 350, but 8% of 2800 is 224!
+              total: 3150.0,
+              currency: 'USD',
+              fileName: file.name,
+              confidenceScore: 0.94,
+              extractedByAI: true,
+              lineItems: [
+                {
+                  id: 'li-1',
+                  description: 'Cross-Border Drayage & Container Handling',
+                  quantity: 2,
+                  unitPrice: 1000.0,
+                  total: 2000.0,
+                },
+                {
+                  id: 'li-2',
+                  description: 'Overnight Warehouse Storage Surcharge',
+                  quantity: 1,
+                  unitPrice: 500.0,
+                  total: 500.0,
+                },
+              ],
+            }
+          } else if (sampleType === 'duplicate') {
+            sample = {
+              invoiceNumber: 'INV-2026-4828', // Matches existing invoice
+              vendor: 'Northwind Global Freight LLC',
+              vendorCategory: 'Logistics',
+              issueDate: new Date().toISOString().slice(0, 10),
+              dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+              subtotal: 6280.0,
+              taxRate: 0.0,
+              taxAmount: 0.0,
+              total: 6280.0,
+              currency: 'USD',
+              fileName: file.name,
+              confidenceScore: 0.95,
+              extractedByAI: true,
+              lineItems: [
+                {
+                  id: 'li-dup',
+                  description: 'Cross-Border Drayage & Container Handling',
+                  quantity: 2,
+                  unitPrice: 2800.0,
+                  total: 5600.0,
+                },
+                {
+                  id: 'li-fuel',
+                  description: 'Fuel Surcharge Peak Adjustment',
+                  quantity: 1,
+                  unitPrice: 680.0,
+                  total: 680.0,
+                },
+              ],
+            }
+          } else {
+            sample = {
+              invoiceNumber: `INV-${Math.floor(1000 + Math.random() * 9000)}`,
+              vendor: 'Stripe Cloud Infrastructure',
+              vendorCategory: 'Software / SaaS',
+              issueDate: new Date().toISOString().slice(0, 10),
+              dueDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+              subtotal: 1600.0,
+              taxRate: 0.05,
+              taxAmount: 80.0,
+              total: 1680.0,
+              currency: 'USD',
+              fileName: file.name,
+              confidenceScore: 0.99,
+              extractedByAI: true,
+              lineItems: [
+                {
+                  id: 'li-1',
+                  description: 'Enterprise Billing API Nodes (Tier 1)',
+                  quantity: 2,
+                  unitPrice: 600.0,
+                  total: 1200.0,
+                },
+                {
+                  id: 'li-2',
+                  description: 'Radar Fraud Protection Active Addon',
+                  quantity: 1,
+                  unitPrice: 400.0,
+                  total: 400.0,
+                },
+              ],
+            }
           }
-        } else if (sampleType === 'duplicate') {
-          sample = {
-            invoiceNumber: 'INV-2026-4828', // Matches existing invoice
-            vendor: 'Northwind Global Freight LLC',
-            vendorCategory: 'Logistics',
-            issueDate: new Date().toISOString().slice(0, 10),
-            dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
-            subtotal: 6280.0,
-            taxRate: 0.0,
-            taxAmount: 0.0,
-            total: 6280.0,
-            currency: 'USD',
-            fileName: file.name,
-            confidenceScore: 0.95,
-            extractedByAI: true,
-            lineItems: [
-              {
-                id: 'li-dup',
-                description: 'Cross-Border Drayage & Container Handling',
-                quantity: 2,
-                unitPrice: 2800.0,
-                total: 5600.0,
-              },
-              {
-                id: 'li-fuel',
-                description: 'Fuel Surcharge Peak Adjustment',
-                quantity: 1,
-                unitPrice: 680.0,
-                total: 680.0,
-              },
-            ],
-          }
-        } else {
-          sample = {
-            invoiceNumber: `INV-${Math.floor(1000 + Math.random() * 9000)}`,
-            vendor: 'Stripe Cloud Infrastructure',
-            vendorCategory: 'Software / SaaS',
-            issueDate: new Date().toISOString().slice(0, 10),
-            dueDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-            subtotal: 1600.0,
-            taxRate: 0.05,
-            taxAmount: 80.0,
-            total: 1680.0,
-            currency: 'USD',
-            fileName: file.name,
-            confidenceScore: 0.99,
-            extractedByAI: true,
-            lineItems: [
-              {
-                id: 'li-1',
-                description: 'Enterprise Billing API Nodes (Tier 1)',
-                quantity: 2,
-                unitPrice: 600.0,
-                total: 1200.0,
-              },
-              {
-                id: 'li-2',
-                description: 'Radar Fraud Protection Active Addon',
-                quantity: 1,
-                unitPrice: 400.0,
-                total: 400.0,
-              },
-            ],
-          }
-        }
 
-        const record = invoiceService.addInvoice(sample)
-        setIsProcessingUpload(false)
-        setUploadSuccessMessage(
-          `Audited "${file.name}". Evaluated ${record.flags.length} audit anomaly flag(s).`
-        )
-        reloadInvoices()
-        setSelectedInvoice(record)
-        setActiveTab('invoices')
-      }, 800)
+          const record = invoiceService.addInvoice(sample)
+          setUploadSuccessMessage(
+            `Audited "${file.name}". Evaluated ${record.flags.length} audit anomaly flag(s).`
+          )
+          reloadInvoices()
+          setSelectedInvoice(record)
+          setActiveTab('invoices')
+        } catch (e) {
+          console.error(e)
+          setUploadSuccessMessage('Error auditing document.')
+        } finally {
+          setIsProcessingUpload(false)
+        }
+      }, 400)
     } catch (err) {
       setIsProcessingUpload(false)
       alert('Failed to parse file: ' + String(err))
@@ -311,69 +333,75 @@ export function DashboardPage() {
     setUploadSuccessMessage('')
 
     setTimeout(() => {
-      let sample
-      if (type === 'clean') {
-        sample = {
-          invoiceNumber: `INV-${Math.floor(1000 + Math.random() * 9000)}`,
-          vendor: 'Figma Design Cloud',
-          vendorCategory: 'Software / SaaS' as const,
-          issueDate: new Date().toISOString().slice(0, 10),
-          dueDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-          subtotal: 1800.0,
-          taxRate: 0.0825,
-          taxAmount: 148.5,
-          total: 1948.5,
-          currency: 'USD',
-          fileName: 'figma-enterprise-seats.pdf',
-          lineItems: [
-            { id: 'li-1', description: 'Enterprise Design Editor Seats (x10)', quantity: 10, unitPrice: 75.0, total: 750.0 },
-            { id: 'li-2', description: 'FigJam Organization Whiteboard Tier', quantity: 1, unitPrice: 1050.0, total: 1050.0 },
-          ],
+      try {
+        let sample
+        if (type === 'clean') {
+          sample = {
+            invoiceNumber: `INV-${Math.floor(1000 + Math.random() * 9000)}`,
+            vendor: 'Figma Design Cloud',
+            vendorCategory: 'Software / SaaS' as const,
+            issueDate: new Date().toISOString().slice(0, 10),
+            dueDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+            subtotal: 1800.0,
+            taxRate: 0.0825,
+            taxAmount: 148.5,
+            total: 1948.5,
+            currency: 'USD',
+            fileName: 'figma-enterprise-seats.pdf',
+            lineItems: [
+              { id: 'li-1', description: 'Enterprise Design Editor Seats (x10)', quantity: 10, unitPrice: 75.0, total: 750.0 },
+              { id: 'li-2', description: 'FigJam Organization Whiteboard Tier', quantity: 1, unitPrice: 1050.0, total: 1050.0 },
+            ],
+          }
+        } else if (type === 'duplicate') {
+          sample = {
+            invoiceNumber: 'INV-2026-4828', // Same number as existing invoice
+            vendor: 'Northwind Global Freight LLC',
+            vendorCategory: 'Logistics' as const,
+            issueDate: new Date().toISOString().slice(0, 10),
+            dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+            subtotal: 6280.0,
+            taxRate: 0.0,
+            taxAmount: 0.0,
+            total: 6280.0,
+            currency: 'USD',
+            fileName: 'northwind-resubmission-copy.pdf',
+            lineItems: [
+              { id: 'li-dup', description: 'Cross-Border Drayage & Container Handling', quantity: 2, unitPrice: 2800.0, total: 5600.0 },
+              { id: 'li-fuel', description: 'Fuel Surcharge Peak Adjustment', quantity: 1, unitPrice: 680.0, total: 680.0 },
+            ],
+          }
+        } else {
+          sample = {
+            invoiceNumber: `INV-TAX-${Math.floor(1000 + Math.random() * 9000)}`,
+            vendor: 'Global Cloud Systems Inc',
+            vendorCategory: 'Cloud & Infra' as const,
+            issueDate: new Date().toISOString().slice(0, 10),
+            dueDate: new Date(Date.now() + 20 * 86400000).toISOString().slice(0, 10),
+            subtotal: 2500.0,
+            taxRate: 0.05, // Expected $125
+            taxAmount: 305.0, // Error: $180 mismatch
+            total: 2805.0,
+            currency: 'USD',
+            fileName: 'cloud-infra-tax-err.pdf',
+            lineItems: [
+              { id: 'li-err1', description: 'Dedicated Virtual Host Cluster (Tier 2)', quantity: 2, unitPrice: 1250.0, total: 2500.0 },
+            ],
+          }
         }
-      } else if (type === 'duplicate') {
-        sample = {
-          invoiceNumber: 'INV-2026-4828', // Same number as existing invoice
-          vendor: 'Northwind Global Freight LLC',
-          vendorCategory: 'Logistics' as const,
-          issueDate: new Date().toISOString().slice(0, 10),
-          dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
-          subtotal: 6280.0,
-          taxRate: 0.0,
-          taxAmount: 0.0,
-          total: 6280.0,
-          currency: 'USD',
-          fileName: 'northwind-resubmission-copy.pdf',
-          lineItems: [
-            { id: 'li-dup', description: 'Cross-Border Drayage & Container Handling', quantity: 2, unitPrice: 2800.0, total: 5600.0 },
-            { id: 'li-fuel', description: 'Fuel Surcharge Peak Adjustment', quantity: 1, unitPrice: 680.0, total: 680.0 },
-          ],
-        }
-      } else {
-        sample = {
-          invoiceNumber: `INV-TAX-${Math.floor(1000 + Math.random() * 9000)}`,
-          vendor: 'Global Cloud Systems Inc',
-          vendorCategory: 'Cloud & Infra' as const,
-          issueDate: new Date().toISOString().slice(0, 10),
-          dueDate: new Date(Date.now() + 20 * 86400000).toISOString().slice(0, 10),
-          subtotal: 2500.0,
-          taxRate: 0.05, // Expected $125
-          taxAmount: 305.0, // Error: $180 mismatch
-          total: 2805.0,
-          currency: 'USD',
-          fileName: 'cloud-infra-tax-err.pdf',
-          lineItems: [
-            { id: 'li-err1', description: 'Dedicated Virtual Host Cluster (Tier 2)', quantity: 2, unitPrice: 1250.0, total: 2500.0 },
-          ],
-        }
-      }
 
-      const record = invoiceService.addInvoice(sample)
-      setIsProcessingUpload(false)
-      setUploadSuccessMessage(`Audited "${sample.invoiceNumber}". Evaluated ${record.flags.length} flag(s).`)
-      reloadInvoices()
-      setSelectedInvoice(record)
-      setActiveTab('invoices')
-    }, 800)
+        const record = invoiceService.addInvoice(sample)
+        setUploadSuccessMessage(`Audited "${sample.invoiceNumber}". Evaluated ${record.flags.length} flag(s).`)
+        reloadInvoices()
+        setSelectedInvoice(record)
+        setActiveTab('invoices')
+      } catch (err) {
+        console.error(err)
+        setUploadSuccessMessage('Error auditing document.')
+      } finally {
+        setIsProcessingUpload(false)
+      }
+    }, 400)
   }
 
   // Handle AI Chat query
@@ -950,10 +978,19 @@ export function DashboardPage() {
                   <div className="space-y-3">
                     <div className="inline-flex items-center gap-3 px-6 py-3 rounded-xl bg-[#121829] border border-[#21d2ed]/40 text-[#21d2ed] text-sm animate-pulse shadow-[0_0_20px_rgba(33,210,237,0.2)]">
                       <RefreshCw className="size-4 animate-spin" />
-                      <span>Gemini OCR Multimodal Vision extraction running...</span>
+                      <span>Auditing document calculations & rules...</span>
                     </div>
                     {/* Simulated laser scan bar */}
                     <div className="h-1 w-48 mx-auto bg-gradient-to-r from-transparent via-[#21d2ed] to-transparent animate-pulse" />
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => setIsProcessingUpload(false)}
+                        className="text-xs text-neutral-400 hover:text-white underline cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-3">

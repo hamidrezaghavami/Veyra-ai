@@ -411,6 +411,10 @@ export const invoiceService = {
     return record
   },
 
+  uploadAndIngest(newInv: Omit<InvoiceRecord, 'id' | 'flags' | 'auditHistory'>): InvoiceRecord {
+    return this.addInvoice(newInv)
+  },
+
   resetDefaults(): InvoiceRecord[] {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_INVOICES))
     return INITIAL_INVOICES
