@@ -164,9 +164,19 @@ export function Navbar() {
                 >
                   Dashboard
                 </LiquidButton>
-                <div className="size-7 rounded-full bg-[#21d2ed]/20 text-[#21d2ed] border border-[#21d2ed]/40 flex items-center justify-center text-[11px] font-semibold">
-                  {(authService.getCurrentUser()?.name || 'U').slice(0, 2).toUpperCase()}
-                </div>
+                <button
+                  onClick={() => navigate('/account')}
+                  className="size-7 rounded-full bg-[#21d2ed]/20 text-[#21d2ed] border border-[#21d2ed]/40 flex items-center justify-center text-[11px] font-semibold cursor-pointer hover:bg-[#21d2ed]/30 transition-all"
+                  title="Go to Account Dashboard"
+                >
+                  {(authService.getCurrentUser()?.name || 'FC')
+                    .split(' ')
+                    .filter(Boolean)
+                    .map((w) => w[0])
+                    .join('')
+                    .slice(0, 2)
+                    .toUpperCase() || 'FC'}
+                </button>
               </>
             ) : (
               <>

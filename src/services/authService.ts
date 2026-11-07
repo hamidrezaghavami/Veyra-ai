@@ -105,7 +105,30 @@ export const authService = {
     try {
       const data = localStorage.getItem(AUTH_USER_KEY)
       if (!data) return null
-      return JSON.parse(data)
+      const parsed = JSON.parse(data) as UserSession
+
+      // Automatic migration: cleanse any legacy personal developer sessions cached in localStorage
+      const nameLower = (parsed.name || '').toLowerCase()
+      const emailLower = (parsed.email || '').toLowerCase()
+      if (
+        nameLower.includes('hamid') ||
+        nameLower.includes('reza') ||
+        nameLower.includes('ghavami') ||
+        emailLower.includes('hamid') ||
+        emailLower.includes('ghavami')
+      ) {
+        const sanitized: UserSession = {
+          ...parsed,
+          name: 'Alex Morgan',
+          email: 'controller@veyra.ai',
+          role: 'Finance Controller',
+          company: 'Veyra Org',
+        }
+        localStorage.setItem(AUTH_USER_KEY, JSON.stringify(sanitized))
+        return sanitized
+      }
+
+      return parsed
     } catch {
       return null
     }
