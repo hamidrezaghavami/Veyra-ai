@@ -8,5 +8,6 @@ export const config = {
   googleProject: process.env.GOOGLE_CLOUD_PROJECT || '870760192611',
   geminiModel: process.env.GEMINI_MODEL || 'gemini-3.8-flash',
   geminiFallbackModel: process.env.GEMINI_FALLBACK_MODEL || 'gemini-flash-latest',
+  databaseUrl: process.env.DATABASE_URL || '',
   isDev: process.env.NODE_ENV !== 'production',
 }

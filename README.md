@@ -1,7 +1,23 @@
 # Veyra AI — Invoice & Expense Auditing Platform
 
-> **"Your invoices, audited. Your expenses, clear."**
-> Full-stack web application faithfully re-created from the official Framer design system (`earlier-weather-453183.framer.app`).
+> **"Your invoices, audited. Your expenses, clear."**  
+> Full-stack enterprise web application faithfully re-created from the official Framer design system (`earlier-weather-453183.framer.app`).
+
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/hamidrezaghavami/Veyra-ai)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/hamidrezaghavami/Veyra-ai)
+
+---
+
+## 🌐 Live Website Access
+
+| Component | Platform | Free Tier URL / Status |
+|---|---|---|
+| **Primary Website URL (Single Access)** | **Vercel** | [https://veyra-ai.vercel.app](https://veyra-ai.vercel.app) |
+| **Backend REST API & Engine** | **Render** | `https://veyra-ai-backend.onrender.com` (proxied via `/api/*`) |
+| **Serverless Database** | **Neon** | PostgreSQL `neondb` (Auto-reconciled) |
+| **AI Intelligence** | **Google Cloud Gemini** | `gemini-3.8-flash` / `gemini-flash-latest` |
+
+> 💡 **Single Access Point:** All API traffic (`/api/*`) is reverse-proxied transparently from Vercel to Render. Users, browsers, and mobile clients only ever navigate to one URL: **`https://veyra-ai.vercel.app`**.
 
 ---
 
@@ -9,7 +25,60 @@
 
 **Veyra AI** is an intelligent invoice processing, expense tracking, and automated financial auditing platform designed for freelancers, high-growth startups, and modern accounting teams.
 
-It extracts key line items from invoices and receipts using vision OCR, executes automated deterministic rule validations (duplicate detection, math sum checks, tax rate consistency, high-value spend thresholds), and maintains a human-in-the-loop approval workflow with an embedded AI Financial Assistant.
+It extracts key line items from invoices and receipts using multimodal vision OCR, executes automated deterministic rule validations (duplicate detection, math sum checks, tax rate consistency, high-value spend thresholds), and maintains a human-in-the-loop approval workflow with an embedded AI Financial Assistant.
+
+---
+
+## ☁️ Free Hosting Architecture (Vercel + Render + Neon)
+
+The application is deployed across three free-tier cloud platforms for optimal performance and zero operating costs:
+
+```
+                  ┌──────────────────────────────────────────────┐
+                  │                 CLIENT BROWSER               │
+                  │         https://veyra-ai.vercel.app          │
+                  └───────────────────────┬──────────────────────┘
+                                          │
+                  ┌───────────────────────▼──────────────────────┐
+                  │              VERCEL (Frontend)               │
+                  │   - Global Edge CDN                          │
+                  │   - React 19 + Vite Static Assets            │
+                  │   - vercel.json Edge Reverse Proxy           │
+                  └───────────────┬──────────────────────────────┘
+                                  │  Proxy /api/*
+                  ┌───────────────▼──────────────────────────────┐
+                  │               RENDER (Backend)               │
+                  │   - Express 5 + Node.js Web Service          │
+                  │   - render.yaml Blueprint Deploy             │
+                  │   - Google Gemini AI OCR & Financial Chat    │
+                  │   - Deterministic 4-Layer Audit Engine       │
+                  └───────────────┬──────────────────────────────┘
+                                  │
+                  ┌───────────────▼──────────────────────────────┐
+                  │             NEON (Database)                  │
+                  │   - Serverless PostgreSQL Free Tier          │
+                  │   - Invoices, Waitlist & Contacts Tables     │
+                  │   - Zero-Downtime In-Memory Fallback         │
+                  └──────────────────────────────────────────────┘
+```
+
+### 1. Frontend: Vercel (Free Tier)
+- **Framework:** Vite Single Page Application (SPA).
+- **Configuration:** `vercel.json` rewrites all `/api/(.*)` requests to the Render backend web service.
+- **Benefits:** Instant global CDN distribution, edge routing, zero CORS hurdles, and a single public domain.
+
+### 2. Backend: Render (Free Tier)
+- **Runtime:** Node.js (via `pnpm`).
+- **Configuration:** Managed via `render.yaml` Infrastructure-as-Code Blueprint.
+- **Commands:**
+  - Build: `pnpm install`
+  - Start: `pnpm start:backend`
+  - Health: `GET /api/health`
+
+### 3. Database: Neon (Free Tier)
+- **Engine:** Serverless PostgreSQL.
+- **Tables:** `veyra_invoices`, `veyra_waitlist`, `veyra_contacts`.
+- **Resilience:** Built with automatic failover to the high-performance in-memory persistence store if `DATABASE_URL` is not yet attached.
 
 ---
 
@@ -69,18 +138,21 @@ Every single page and route from the Framer project is fully implemented:
 
 ## 🧠 Backend Infrastructure (`src/backend`)
 
-The application is powered by a high-performance backend with **Google Gemini AI** and deterministic financial audit rules:
-
 ```
 src/backend/
-├── config/        # Environment & Google Cloud Gemini configurations
-├── gemini/        # Google Gemini AI client (vision OCR & financial chat)
-├── audit/         # Deterministic audit engine (duplicate, math, tax, high-value)
-├── db/            # In-memory and persistent financial ledger store
-├── services/      # Invoices, AI Chat, Analytics, Auth (OTP), Waitlist & Contact
-├── routes/        # REST API endpoints (/api/invoices, /api/chat, /api/analytics, etc.)
-├── vitePlugin.ts  # Vite middleware plugin: auto-mounts /api directly in dev server
-└── index.ts       # Standalone Node.js Express server runner
+├── config.ts          # Environment, Gemini AI & Database configuration
+├── gemini/            # Google Gemini AI client (vision OCR & financial chat)
+│   └── client.ts
+├── audit/             # Deterministic audit engine (duplicate, math, tax, high-value)
+│   └── engine.ts
+├── db/                # Neon Postgres adapter & in-memory persistence store
+│   ├── neon.ts
+│   └── store.ts
+├── services/          # Business logic: Invoices, AI Chat, Analytics, Auth (OTP), Forms
+├── routes/            # REST API route handlers
+├── app.ts             # Express application factory
+├── vitePlugin.ts      # Vite middleware plugin (dev proxy)
+└── index.ts           # Standalone production Node.js server
 ```
 
 ### 🤖 Gemini AI Features:
@@ -93,7 +165,7 @@ src/backend/
   4. *High-Value Spend Thresholds:* Flags transactions exceeding $10,000 for dual executive sign-off.
 
 ### 🌐 REST API Endpoints:
-- `GET /api/health` — Backend health & Gemini AI status
+- `GET /api/health` — Backend health, Gemini AI & Neon DB status
 - `GET /api/invoices` — List invoices with query filtering (status, category, search)
 - `GET /api/invoices/:id` — Single invoice record with audit history
 - `POST /api/invoices/upload-and-audit` — Ingest document & run full Gemini OCR audit
@@ -109,16 +181,6 @@ src/backend/
 
 ---
 
-## 🛠 Tech Stack
-
-* **Frontend:** React 19 + TypeScript, Tailwind CSS 4, Framer Motion, Lucide Icons
-* **Backend:** Node.js, Express 5, TypeScript, Vite Connect Middleware
-* **AI Engine:** Google Gemini AI (`@google/genai`, `gemini-3.8-flash` / `gemini-flash-latest`)
-* **Package Manager:** pnpm 12
-* **Build Tool:** Vite 8
-
----
-
 ## 💻 Local Development
 
 ```bash
@@ -129,7 +191,7 @@ pnpm install
 pnpm dev
 
 # 3. (Optional) Run standalone backend API server on http://localhost:3001
-pnpm dev:backend
+pnpm start:backend
 
 # 4. Build for production
 pnpm build
@@ -137,3 +199,9 @@ pnpm build
 # 5. Preview production build
 pnpm preview
 ```
+
+---
+
+## 📄 License
+
+MIT License — Created for Veyra AI.
