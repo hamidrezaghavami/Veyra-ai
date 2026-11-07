@@ -972,12 +972,12 @@ export function DashboardPage() {
                     </label>
 
                     <a
-                      href="/test-invoice-math-error.json"
-                      download="test-invoice-math-error.json"
+                      href="/invoice-math-error-sample.pdf"
+                      download="invoice-math-error-sample.pdf"
                       className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-[#121829] hover:bg-[#1c2438] text-neutral-300 hover:text-white border border-cyan-500/25 text-xs font-semibold transition-all shadow-sm"
                     >
                       <Download className="size-3.5 text-cyan-400" />
-                      <span>Download Math-Error Test File</span>
+                      <span>Download Sample PDF Invoice</span>
                     </a>
                   </div>
                 )}
