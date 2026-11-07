@@ -11,16 +11,39 @@ const AUTH_USER_KEY = 'veyra_auth_user'
 const PENDING_OTP_KEY = 'veyra_pending_otp'
 
 export const authService = {
-  // Step 1: Request 6-digit code for email
-  requestOtp(email: string): { success: boolean; code: string } {
+  // Check if a user is currently signed in
+  isAuthenticated(): boolean {
+    return Boolean(this.getCurrentUser())
+  },
+
+  // Direct login or account creation
+  createUserSession(email: string, name?: string): UserSession {
     const cleanEmail = email.trim().toLowerCase()
-    // Generate deterministic or random 6-digit code
+    const derivedName = name?.trim() || cleanEmail.split('@')[0].replace(/[._-]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+
+    const user: UserSession = {
+      email: cleanEmail,
+      name: derivedName,
+      role: 'Finance Controller',
+      company: 'Veyra Org',
+      avatarUrl: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80`,
+      token: `vyra_tk_${Date.now()}`,
+    }
+
+    localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
+    return user
+  },
+
+  // Step 1: Request 6-digit code for email
+  requestOtp(email: string, name?: string): { success: boolean; code: string } {
+    const cleanEmail = email.trim().toLowerCase()
     const code = Math.floor(100000 + Math.random() * 900000).toString()
 
     localStorage.setItem(
       PENDING_OTP_KEY,
       JSON.stringify({
         email: cleanEmail,
+        name: name?.trim() || '',
         code,
         timestamp: Date.now(),
       })
@@ -65,21 +88,11 @@ export const authService = {
       }
 
       const pending = JSON.parse(data)
-      // Allow the actual generated code OR standard demo code '123456'
       if (code !== pending.code && code !== '123456') {
-        return { success: false, error: 'Invalid verification code. Please check your email or use 123456.' }
+        return { success: false, error: 'Invalid verification code. Please check your code or enter 123456.' }
       }
 
-      const user: UserSession = {
-        email: pending.email,
-        name: pending.email.split('@')[0].replace('.', ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
-        role: 'Finance Controller',
-        company: 'Veyra Org',
-        avatarUrl: `https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80`,
-        token: `vyra_tk_${Date.now()}`,
-      }
-
-      localStorage.setItem(AUTH_USER_KEY, JSON.stringify(user))
+      const user = this.createUserSession(pending.email, pending.name)
       localStorage.removeItem(PENDING_OTP_KEY)
 
       return { success: true, user }
@@ -91,17 +104,7 @@ export const authService = {
   getCurrentUser(): UserSession | null {
     try {
       const data = localStorage.getItem(AUTH_USER_KEY)
-      if (!data) {
-        // Return default authenticated demo user so user can test the app immediately if they want
-        return {
-          email: 'kadir@veyra.ai',
-          name: 'Kadir Calik',
-          role: 'Head of Finance',
-          company: 'Veyra AI Labs',
-          avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=120&auto=format&fit=crop&q=80',
-          token: 'vyra_default_tk',
-        }
-      }
+      if (!data) return null
       return JSON.parse(data)
     } catch {
       return null

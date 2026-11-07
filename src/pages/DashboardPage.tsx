@@ -33,7 +33,7 @@ import { aiAssistantService, AssistantMessage } from '../services/aiAssistantSer
 import { useRouter } from '../context/RouterContext'
 import { ShaderBackground } from '../components/ShaderBackground'
 import { LiquidButton } from '../components/LiquidButton'
-import { useClerkConfig, useUser, UserButton } from '../lib/clerk'
+import { useClerkConfig, useUser, UserButton, SignedIn, SignedOut } from '../lib/clerk'
 
 export function DashboardPage() {
   const { navigate } = useRouter()
@@ -62,11 +62,19 @@ export function DashboardPage() {
   ])
   const [inputQuery, setInputQuery] = useState('')
 
+  const { isConfigured } = useClerkConfig()
+
   useEffect(() => {
-    const user = authService.getCurrentUser()
-    setCurrentUser(user)
+    if (!isConfigured) {
+      const user = authService.getCurrentUser()
+      if (!user) {
+        navigate('/sign-up')
+        return
+      }
+      setCurrentUser(user)
+    }
     setInvoices(invoiceService.getAll())
-  }, [])
+  }, [isConfigured, navigate])
 
   const reloadInvoices = () => {
     const list = invoiceService.getAll()
@@ -226,7 +234,7 @@ export function DashboardPage() {
   const flaggedCount = invoices.filter((i) => i.status === 'Flagged' || i.flags.length > 0).length
   const approvedTotal = invoices.filter((i) => i.status === 'Approved').reduce((acc, i) => acc + i.total, 0)
 
-  return (
+  const dashboardContent = (
     <div className="min-h-screen bg-transparent text-white pt-20 pb-20 relative overflow-hidden">
 
       {/* Top Liquid Glass Header Bar */}
@@ -852,6 +860,19 @@ export function DashboardPage() {
       )}
     </div>
   )
+
+  if (isConfigured) {
+    return (
+      <>
+        <SignedIn>{dashboardContent}</SignedIn>
+        <SignedOut>
+          <SignedOutRedirect />
+        </SignedOut>
+      </>
+    )
+  }
+
+  return dashboardContent
 }
 
 function DashboardUserProfile({
@@ -865,12 +886,20 @@ function DashboardUserProfile({
   if (isConfigured) {
     return <ClerkUserWidget />
   }
+  const name = currentUser?.name || 'Auditor'
+  const initials = name
+    .split(' ')
+    .map((w) => w[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+
   return (
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass-secondary text-[13px]">
       <div className="size-5 rounded-full bg-[#21d2ed]/25 text-[#21d2ed] flex items-center justify-center text-[10px] font-semibold border border-[#21d2ed]/40">
-        {(currentUser?.name || 'KC').slice(0, 2).toUpperCase()}
+        {initials || 'U'}
       </div>
-      <span className="text-white hidden sm:inline">{currentUser?.name || 'Kadir Calik'}</span>
+      <span className="text-white hidden sm:inline">{name}</span>
       <button
         onClick={onSignOut}
         className="text-neutral-400 hover:text-white ml-1 transition-colors cursor-pointer"
@@ -894,6 +923,19 @@ function ClerkUserWidget() {
     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass-secondary text-[13px]">
       <UserButton />
       <span className="text-white hidden sm:inline font-medium">{displayName}</span>
+    </div>
+  )
+}
+
+function SignedOutRedirect() {
+  const { navigate } = useRouter()
+  useEffect(() => {
+    navigate('/sign-up')
+  }, [navigate])
+
+  return (
+    <div className="min-h-screen bg-[#0d0d0f] flex items-center justify-center text-white">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#21d2ed]"></div>
     </div>
   )
 }

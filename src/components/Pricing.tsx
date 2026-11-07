@@ -135,7 +135,7 @@ export function Pricing() {
               <LiquidButton
                 variant={plan.popular ? 'primary' : 'secondary'}
                 size="md"
-                onClick={() => navigate('/account')}
+                onClick={() => navigate('/sign-up')}
                 className="w-full"
                 icon={<ArrowRight className="size-3.5" />}
               >

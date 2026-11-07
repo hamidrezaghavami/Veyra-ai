@@ -35,7 +35,7 @@ export function CtaBanner() {
               <LiquidButton
                 variant="primary"
                 size="lg"
-                onClick={() => navigate('/account')}
+                onClick={() => navigate('/sign-up')}
                 className="w-full sm:w-auto"
                 icon={<ArrowRight className="size-4" />}
               >

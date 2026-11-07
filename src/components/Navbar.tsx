@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from '../context/RouterContext'
 import { LiquidButton } from './LiquidButton'
 import { useClerkConfig, SignedIn, SignedOut, UserButton } from '../lib/clerk'
+import { authService } from '../services/authService'
 
 export function Navbar() {
   const { path, navigate } = useRouter()
@@ -153,6 +154,20 @@ export function Navbar() {
                   </LiquidButton>
                 </SignedOut>
               </>
+            ) : authService.isAuthenticated() ? (
+              <>
+                <LiquidButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => navigate('/account')}
+                  className="border-white/10"
+                >
+                  Dashboard
+                </LiquidButton>
+                <div className="size-7 rounded-full bg-[#21d2ed]/20 text-[#21d2ed] border border-[#21d2ed]/40 flex items-center justify-center text-[11px] font-semibold">
+                  {(authService.getCurrentUser()?.name || 'U').slice(0, 2).toUpperCase()}
+                </div>
+              </>
             ) : (
               <>
                 <LiquidButton
@@ -166,7 +181,7 @@ export function Navbar() {
                 <LiquidButton
                   variant="primary"
                   size="sm"
-                  onClick={() => navigate('/account')}
+                  onClick={() => navigate('/sign-up')}
                   icon={<ArrowRight className="size-3.5" />}
                 >
                   Get started
@@ -233,7 +248,7 @@ export function Navbar() {
                   size="md"
                   onClick={() => {
                     setMobileMenuOpen(false)
-                    navigate('/account')
+                    navigate('/sign-up')
                   }}
                   className="w-full"
                   icon={<ArrowRight className="size-3.5" />}
