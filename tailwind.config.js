@@ -7,8 +7,9 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        heading: ['"Space Grotesk"', 'sans-serif'],
-        body: ['"Plus Jakarta Sans"', 'sans-serif'],
+        sans: ['"Onest"', 'Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        heading: ['"Onest"', '"Space Grotesk"', 'sans-serif'],
+        body: ['"Onest"', '"Plus Jakarta Sans"', 'sans-serif'],
       },
     },
   },
