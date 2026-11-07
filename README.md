@@ -12,12 +12,12 @@
 
 | Component | Platform | Free Tier URL / Status |
 |---|---|---|
-| **Primary Website URL (Single Access)** | **Vercel** | [https://veyra-ai.vercel.app](https://veyra-ai.vercel.app) |
+| **Primary Website URL (Single Access)** | **Vercel** | [https://veyra-ai-lemon.vercel.app](https://veyra-ai-lemon.vercel.app) |
 | **Backend REST API & Engine** | **Render** | `https://veyra-ai-backend.onrender.com` (proxied via `/api/*`) |
 | **Serverless Database** | **Neon** | PostgreSQL `neondb` (Auto-reconciled) |
 | **AI Intelligence** | **Google Cloud Gemini** | `gemini-3.8-flash` / `gemini-flash-latest` |
 
-> 💡 **Single Access Point:** All API traffic (`/api/*`) is reverse-proxied transparently from Vercel to Render. Users, browsers, and mobile clients only ever navigate to one URL: **`https://veyra-ai.vercel.app`**.
+> 💡 **Single Access Point:** All API traffic (`/api/*`) is reverse-proxied transparently from Vercel to Render. Users, browsers, and mobile clients only ever navigate to one URL: **`https://veyra-ai-lemon.vercel.app`**.
 
 ---
 
@@ -36,7 +36,7 @@ The application is deployed across three free-tier cloud platforms for optimal p
 ```
                   ┌──────────────────────────────────────────────┐
                   │                 CLIENT BROWSER               │
-                  │         https://veyra-ai.vercel.app          │
+                  │       https://veyra-ai-lemon.vercel.app      │
                   └───────────────────────┬──────────────────────┘
                                           │
                   ┌───────────────────────▼──────────────────────┐
