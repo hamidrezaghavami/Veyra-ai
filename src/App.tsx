@@ -80,12 +80,23 @@ function RouteSwitcher() {
   return <NotFoundPage />
 }
 
+function MainContent() {
+  const { path } = useRouter()
+  const isDashboard = path === '/account' || path === '/dashboard'
+
+  return (
+    <>
+      {!isDashboard && <AtmosphericBackground />}
+      <RouteSwitcher />
+    </>
+  )
+}
+
 export default function App() {
   return (
     <VeyraClerkProvider>
       <RouterProvider>
-        <AtmosphericBackground />
-        <RouteSwitcher />
+        <MainContent />
       </RouterProvider>
     </VeyraClerkProvider>
   )
