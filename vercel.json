@@ -3,30 +3,45 @@
   "framework": "vite",
   "buildCommand": "pnpm build",
   "outputDirectory": "dist",
-  "cleanUrls": true,
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 60
+    }
+  },
   "headers": [
     {
-      "source": "/(invoice-.*\\.pdf)",
+      "source": "/(.*)",
       "headers": [
         {
-          "key": "Content-Disposition",
-          "value": "attachment"
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
         },
         {
-          "key": "Content-Type",
-          "value": "application/pdf"
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
         }
       ]
     }
   ],
   "rewrites": [
     {
-      "source": "/api/:match*",
-      "destination": "https://veyra-ai-backend.onrender.com/api/:match*"
+      "source": "/api/:path*",
+      "destination": "/api"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api(?:/|$)|assets/).*)",
       "destination": "/index.html"
     }
+  ],
+  "regions": [
+    "fra1"
   ]
 }

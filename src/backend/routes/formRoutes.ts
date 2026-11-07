@@ -1,24 +1,14 @@
-import { Router, Request, Response } from 'express'
-import { FormService } from '../services/formService.ts'
-
+import { Router } from 'express'
+import { z } from 'zod'
+import { db } from '../db/store.ts'
+import { contactSchema } from '../validation.ts'
 export const formRouter = Router()
-
-formRouter.post('/waitlist', (req: Request, res: Response) => {
-  try {
-    const { email, teamSize, useCase } = req.body
-    const result = FormService.joinWaitlist(email, teamSize, useCase)
-    res.status(201).json(result)
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: err.message })
-  }
+formRouter.post('/waitlist', async (req, res) => {
+  const { email } = z.object({ email: z.email().max(254).transform(s => s.toLowerCase()) }).strict().parse(req.body)
+  const data = await db.addWaitlist(email)
+  res.status(201).json({ success: true, data })
 })
-
-formRouter.post('/contact', (req: Request, res: Response) => {
-  try {
-    const { name, email, company, inquiryType, message } = req.body
-    const result = FormService.submitContact(name, email, company, inquiryType, message)
-    res.status(201).json(result)
-  } catch (err: any) {
-    res.status(400).json({ success: false, error: err.message })
-  }
+formRouter.post('/contact', async (req, res) => {
+  const data = await db.addContact(contactSchema.parse(req.body))
+  res.status(201).json({ success: true, data })
 })

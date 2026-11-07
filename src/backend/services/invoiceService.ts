@@ -1,211 +1,60 @@
+import { randomUUID } from 'node:crypto'
 import { db } from '../db/store.ts'
 import { AuditEngine } from '../audit/engine.ts'
 import { GeminiClient } from '../gemini/client.ts'
-import { InvoiceRecord, LineItem, VendorCategory } from '../types.ts'
+import { invoiceFields, uploadSchema } from '../validation.ts'
+import type { InvoiceRecord, AuditAction } from '../types.ts'
+import type { z } from 'zod'
 
-export class InvoiceService {
-  static getAll(filters?: { status?: string; search?: string; category?: string }): InvoiceRecord[] {
-    let list = db.getInvoices()
-
-    if (filters?.status && filters.status !== 'all') {
-      const s = filters.status.toLowerCase()
-      list = list.filter((i) => i.status.toLowerCase() === s || (s === 'flagged' && i.flags.length > 0))
+const history = (actor: string, action: string, note?: string): AuditAction => ({ id: randomUUID(), actor, action, note, timestamp: new Date().toISOString() })
+export const InvoiceService = {
+  getAll: (ownerId: string) => db.getInvoices(ownerId),
+  async ingestAndAudit(ownerId: string, actor: string, input: z.infer<typeof uploadSchema>) {
+    const extracted = await GeminiClient.extractInvoiceData(input)
+    const record: InvoiceRecord = {
+      ...extracted.fields,
+      lineItems: extracted.fields.lineItems.map(item => ({ ...item, id: randomUUID() })),
+      id: randomUUID(), status: 'Pending Audit', flags: [], confidenceScore: 0,
+      fileName: input.fileName, extractedByAI: extracted.extractedByAI,
+      auditHistory: [history(actor, extracted.extractedByAI ? 'Document extracted by AI; review required' : 'Structured invoice imported')],
     }
-
-    if (filters?.category && filters.category !== 'all') {
-      list = list.filter((i) => i.vendorCategory.toLowerCase() === filters.category!.toLowerCase())
-    }
-
-    if (filters?.search) {
-      const q = filters.search.toLowerCase()
-      list = list.filter(
-        (i) =>
-          i.vendor.toLowerCase().includes(q) ||
-          i.invoiceNumber.toLowerCase().includes(q) ||
-          i.lineItems.some((li) => li.description.toLowerCase().includes(q))
-      )
-    }
-
-    return list
-  }
-
-  static getById(id: string): InvoiceRecord | null {
-    return db.getInvoiceById(id) || null
-  }
-
-  /**
-   * Upload & Ingest invoice with Gemini OCR + Deterministic Audit Rule Engine
-   */
-  static async ingestAndAudit(payload: {
-    fileName?: string
-    fileType?: string
-    textSnippet?: string
-    mockScenario?: string
-    actor?: string
-  }): Promise<InvoiceRecord> {
-    const existing = db.getInvoices()
-
-    // Step 1: Extract data using Gemini Vision / AI
-    const extracted = await GeminiClient.extractInvoiceData({
-      fileName: payload.fileName,
-      fileType: payload.fileType,
-      text: payload.textSnippet,
-      mockScenario: payload.mockScenario,
+    return db.addInvoice(ownerId, record, (candidate, existing) => {
+      const audit = AuditEngine.runAudit(candidate, existing)
+      Object.assign(candidate, audit)
+      candidate.auditHistory.push(history('Audit engine', 'Validation completed', audit.flags.map(f=>f.message).join(' ') || 'Arithmetic and duplicate checks passed. Human approval is required.'))
+      return candidate
     })
-
-    const newId = `inv-${Date.now().toString(36)}`
-
-    // Step 2: Build record candidate
-    const candidate: InvoiceRecord = {
-      id: newId,
-      invoiceNumber: extracted.invoiceNumber,
-      vendor: extracted.vendor,
-      vendorCategory: extracted.vendorCategory,
-      issueDate: extracted.issueDate,
-      dueDate: extracted.dueDate,
-      subtotal: extracted.subtotal,
-      taxRate: extracted.taxRate,
-      taxAmount: extracted.taxAmount,
-      total: extracted.total,
-      currency: extracted.currency,
-      status: 'Pending Audit',
-      confidenceScore: extracted.confidenceScore,
-      fileName: payload.fileName || 'uploaded-invoice.pdf',
-      aiAnalysisSummary: extracted.aiSummary,
-      lineItems: extracted.lineItems,
-      flags: [],
-      auditHistory: [
-        {
-          id: `ah-${Date.now()}-1`,
-          action: 'Document Ingestion & Gemini Vision OCR Complete',
-          timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
-          actor: 'Veyra Gemini OCR Agent',
-          note: `Extracted ${extracted.lineItems.length} line items with ${(extracted.confidenceScore * 100).toFixed(1)}% confidence.`,
-        },
-      ],
-    }
-
-    // Step 3: Run deterministic audit validation engine
-    const auditResult = AuditEngine.runAudit(candidate, existing)
-    candidate.flags = auditResult.flags
-    candidate.status = auditResult.status
-
-    if (candidate.flags.length > 0) {
-      candidate.auditHistory.unshift({
-        id: `ah-${Date.now()}-2`,
-        action: `Audit Completed: ${candidate.flags.length} Flag(s) Raised`,
-        timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
-        actor: 'Automated Audit Engine',
-        note: candidate.flags.map((f) => f.message).join(' '),
-      })
-    } else {
-      candidate.auditHistory.unshift({
-        id: `ah-${Date.now()}-2`,
-        action: 'Audit Completed: Calculations & Duplicates Cleared',
-        timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
-        actor: 'Automated Audit Engine',
-        note: 'All mathematical and compliance checks passed without discrepancies.',
-      })
-    }
-
-    db.addInvoice(candidate)
-    return candidate
-  }
-
-  static approve(id: string, actor: string = 'Finance Controller'): InvoiceRecord {
-    const inv = db.getInvoiceById(id)
-    if (!inv) throw new Error(`Invoice with id "${id}" not found.`)
-
-    const updated = db.updateInvoice(id, (item) => {
+  },
+  async approve(ownerId: string, id: string, actor: string, note: string) {
+    return db.updateInvoice(ownerId, id, item => {
+      if (item.status === 'Approved') throw Object.assign(new Error('This invoice is already approved.'), { status: 409 })
+      if (item.flags.length && note.trim().length < 10) throw Object.assign(new Error('Explain why you are approving the flagged invoice (at least 10 characters).'), { status: 400 })
       item.status = 'Approved'
-      item.flags = []
-      item.auditHistory.unshift({
-        id: `ah-${Date.now()}`,
-        action: 'Invoice Approved for Disbursement',
-        timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
-        actor,
-        note: 'Verified and authorized for Accounts Payable disbursement ledger.',
-      })
+      // Preserve findings and the reviewer explanation for the audit trail.
+      item.auditHistory.unshift(history(actor, 'Invoice approved', note))
       return item
     })
-
-    return updated!
-  }
-
-  static reject(id: string, reason: string, actor: string = 'Finance Controller'): InvoiceRecord {
-    const inv = db.getInvoiceById(id)
-    if (!inv) throw new Error(`Invoice with id "${id}" not found.`)
-
-    const updated = db.updateInvoice(id, (item) => {
+  },
+  async reject(ownerId: string, id: string, actor: string, note: string) {
+    return db.updateInvoice(ownerId, id, item => {
       item.status = 'Rejected'
-      item.auditHistory.unshift({
-        id: `ah-${Date.now()}`,
-        action: 'Invoice Rejected',
-        timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
-        actor,
-        note: reason || 'Rejected by finance reviewer.',
-      })
+      item.auditHistory.unshift(history(actor, 'Invoice rejected', note))
       return item
     })
-
-    return updated!
-  }
-
-  static flagForReview(id: string, comment: string, actor: string = 'Auditor'): InvoiceRecord {
-    const inv = db.getInvoiceById(id)
-    if (!inv) throw new Error(`Invoice with id "${id}" not found.`)
-
-    const updated = db.updateInvoice(id, (item) => {
+  },
+  async flag(ownerId: string, id: string, actor: string, note: string) {
+    return db.updateInvoice(ownerId, id, item => {
       item.status = 'Flagged'
-      item.auditHistory.unshift({
-        id: `ah-${Date.now()}`,
-        action: 'Flagged for Human Review',
-        timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
-        actor,
-        note: comment,
-      })
+      item.auditHistory.unshift(history(actor, 'Flagged for review', note))
       return item
     })
-
-    return updated!
-  }
-
-  static updateInvoice(id: string, updates: Partial<InvoiceRecord>, actor: string = 'Current User'): InvoiceRecord {
-    const inv = db.getInvoiceById(id)
-    if (!inv) throw new Error(`Invoice with id "${id}" not found.`)
-
-    const existing = db.getInvoices().filter((i) => i.id !== id)
-
-    const updated = db.updateInvoice(id, (item) => {
-      const merged = { ...item, ...updates }
-      // Re-run audit checks on updated fields
-      const audit = AuditEngine.runAudit(merged, existing)
-      merged.flags = audit.flags
-      if (audit.flags.length > 0 && merged.status !== 'Rejected') {
-        merged.status = 'Flagged'
-      } else if (audit.flags.length === 0 && merged.status === 'Flagged') {
-        merged.status = 'Pending Audit'
-      }
-
-      merged.auditHistory.unshift({
-        id: `ah-${Date.now()}`,
-        action: 'Manual Correction Applied',
-        timestamp: new Date().toISOString().replace('T', ' ').slice(0, 19),
-        actor,
-        note: 'Fields corrected and re-checked by automated verification rules.',
-      })
-
-      return merged
+  },
+  async update(ownerId: string, id: string, actor: string, fields: z.infer<typeof invoiceFields>) {
+    return db.updateInvoice(ownerId, id, (item, existing) => {
+      const updated: InvoiceRecord = { ...item, ...fields, lineItems: fields.lineItems.map(line => ({ ...line, id: line.id || randomUUID() })) }
+      Object.assign(updated, AuditEngine.runAudit(updated, existing))
+      updated.auditHistory.unshift(history(actor, 'Invoice corrected and approval reset', 'Edited records require a fresh review.'))
+      return updated
     })
-
-    return updated!
-  }
-
-  static deleteInvoice(id: string): boolean {
-    return db.deleteInvoice(id)
-  }
-
-  static resetDefaults(): InvoiceRecord[] {
-    return db.resetInvoices()
-  }
+  },
 }

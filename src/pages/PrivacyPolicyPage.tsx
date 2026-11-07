@@ -15,7 +15,7 @@ export function PrivacyPolicyPage() {
             Privacy Policy
           </h1>
           <p className="text-[14px] text-neutral-400">
-            Last Updated: Apr 22, 2026
+            Last Updated: November 7, 2026
           </p>
         </div>
 
@@ -23,7 +23,7 @@ export function PrivacyPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-medium text-white">Who We Are</h2>
             <p>
-              Veyra AI is an AI automation and invoice intelligence platform. For the purposes of data protection law, Veyra is the data controller of your personal information. You can reach our data privacy officer at <span className="text-[#21d2ed]">hello@veyra.ai</span>.
+              Veyra AI is an AI automation and invoice intelligence platform. Use our <a href="/contact" className="text-cyan-300 underline">contact form</a> for privacy questions.
             </p>
           </section>
 
@@ -34,7 +34,7 @@ export function PrivacyPolicyPage() {
               <li>Contact details: Name, work email address, and company identifier.</li>
               <li>Document data: Vendor names, invoice line items, tax IDs, and totals extracted from uploaded PDFs and images.</li>
               <li>Audit logs: Timestamps, approval actions, flagged issues, and operator comments.</li>
-              <li>Usage data: Telemetry, device characteristics, and browser interaction logs.</li>
+              <li>Account data: Email address, name, password hash, and session records used to secure your account.</li>
             </ul>
           </section>
 
@@ -46,6 +46,10 @@ export function PrivacyPolicyPage() {
           </section>
 
           <section className="space-y-3">
+            <h2 className="text-xl font-medium text-white">Processing and Storage</h2>
+            <p>Vercel hosts the application and Neon PostgreSQL stores accounts, extracted invoice fields, review history, contact messages, and waitlist registrations. PDF and image contents are sent to Google Gemini for extraction. Assistant questions and your ledger summaries are sent to Gemini when you use the assistant. Provider processing is subject to their applicable terms. Google’s free-tier terms permit submitted content to be used to improve its products; paid-tier terms differ. Avoid uploading sensitive documents when using the free-tier service. Original upload files are not retained by Veyra. Session cookies keep you signed in; extracted records remain until deletion is requested through our contact form.</p>
+          </section>
+          <section className="space-y-3">
             <h2 className="text-xl font-medium text-white">Your Rights</h2>
             <p>
               Under applicable data protection laws (including GDPR and CCPA), you have the right to access, rectify, port, or request deletion of your financial records at any time.
@@ -55,7 +59,7 @@ export function PrivacyPolicyPage() {
           <section className="space-y-3">
             <h2 className="text-xl font-medium text-white">Contact</h2>
             <p>
-              For questions regarding this policy or data processing practices, please contact <span className="text-[#21d2ed]">hello@veyra.ai</span>.
+              For questions regarding this policy or data processing practices, please contact <a href="/contact" className="text-cyan-300 underline">our contact form</a>.
             </p>
           </section>
         </div>

@@ -1,21 +1,20 @@
 import { useRouter, RouterProvider } from './context/RouterContext'
-import { VeyraClerkProvider } from './lib/clerk'
 import { AtmosphericBackground } from './components/AtmosphericBackground'
 import { HomePage } from './pages/HomePage'
-import { WaitlistPage } from './pages/WaitlistPage'
-import { ContactPage } from './pages/ContactPage'
-import { SignInPage } from './pages/SignInPage'
-import { SignUpPage } from './pages/SignUpPage'
-import { OtpPage } from './pages/OtpPage'
-import { DashboardPage } from './pages/DashboardPage'
-import { BlogPage } from './pages/BlogPage'
-import { BlogPostPage } from './pages/BlogPostPage'
-import { ChangelogPage } from './pages/ChangelogPage'
-import { PrivacyPolicyPage } from './pages/PrivacyPolicyPage'
-import { TermsOfServicePage } from './pages/TermsOfServicePage'
-import { DesignSystemPage } from './pages/DesignSystemPage'
-import { ThanksPage } from './pages/ThanksPage'
-import { NotFoundPage } from './pages/NotFoundPage'
+const WaitlistPage = lazy(() => import('./pages/WaitlistPage').then(module => ({ default: module.WaitlistPage })))
+const ContactPage = lazy(() => import('./pages/ContactPage').then(module => ({ default: module.ContactPage })))
+const SignInPage = lazy(() => import('./pages/SignInPage').then(module => ({ default: module.SignInPage })))
+const SignUpPage = lazy(() => import('./pages/SignUpPage').then(module => ({ default: module.SignUpPage })))
+import { lazy, Suspense } from 'react'
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then(module => ({ default: module.DashboardPage })))
+const BlogPage = lazy(() => import('./pages/BlogPage').then(module => ({ default: module.BlogPage })))
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage').then(module => ({ default: module.BlogPostPage })))
+const ChangelogPage = lazy(() => import('./pages/ChangelogPage').then(module => ({ default: module.ChangelogPage })))
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(module => ({ default: module.PrivacyPolicyPage })))
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then(module => ({ default: module.TermsOfServicePage })))
+const DesignSystemPage = lazy(() => import('./pages/DesignSystemPage').then(module => ({ default: module.DesignSystemPage })))
+const ThanksPage = lazy(() => import('./pages/ThanksPage').then(module => ({ default: module.ThanksPage })))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(module => ({ default: module.NotFoundPage })))
 
 function RouteSwitcher() {
   const { path } = useRouter()
@@ -41,7 +40,7 @@ function RouteSwitcher() {
   }
 
   if (path === '/otp') {
-    return <OtpPage />
+    return <SignInPage />
   }
 
   if (path === '/account' || path === '/dashboard') {
@@ -87,17 +86,17 @@ function MainContent() {
   return (
     <>
       {!isDashboard && <AtmosphericBackground />}
-      <RouteSwitcher />
+      <Suspense fallback={<main className="relative z-10 p-12" role="status">Loading…</main>}><RouteSwitcher /></Suspense>
     </>
   )
 }
 
 export default function App() {
   return (
-    <VeyraClerkProvider>
+    <>
       <RouterProvider>
         <MainContent />
       </RouterProvider>
-    </VeyraClerkProvider>
+    </>
   )
 }

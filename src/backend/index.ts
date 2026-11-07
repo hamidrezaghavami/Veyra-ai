@@ -1,17 +1,5 @@
 import { createBackendApp } from './app.ts'
 import { config } from './config.ts'
-
-const app = createBackendApp()
-
-const server = app.listen(config.port, () => {
-  console.log(`=========================================`)
-  console.log(`🚀 Veyra AI Backend Server Online`)
-  console.log(`📡 URL: http://localhost:${config.port}`)
-  console.log(`🤖 Gemini Model: ${config.geminiModel}`)
-  console.log(`🛡️  Audit Engine: Active`)
-  console.log(`=========================================`)
-})
-
-process.on('SIGTERM', () => {
-  server.close(() => console.log('Backend server stopped.'))
-})
+import { pool } from './db/neon.ts'
+const server = createBackendApp().listen(config.port, () => console.log(`Veyra API listening on port ${config.port}`))
+process.on('SIGTERM', () => server.close(async () => { await pool.end() }))

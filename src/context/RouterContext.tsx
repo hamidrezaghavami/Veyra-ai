@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react'
 
 interface RouterContextType {
   path: string
@@ -32,12 +32,12 @@ export function RouterProvider({ children }: { children: React.ReactNode }) {
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
-  const navigate = (to: string) => {
+  const navigate = useCallback((to: string) => {
     if (to === path) return
     window.history.pushState({}, '', to)
-    setPath(to)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
+    setPath(new URL(to, window.location.origin).pathname)
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }, [path])
 
   return (
     <RouterContext.Provider value={{ path, navigate }}>

@@ -14,11 +14,10 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      'next/link': fileURLToPath(new URL('./src/lib/next-link.tsx', import.meta.url)),
     },
   },
   server: {
     port: 3000,
-    open: true
+    open: false
   }
 });

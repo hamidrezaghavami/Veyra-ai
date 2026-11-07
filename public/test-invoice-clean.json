@@ -24,6 +24,5 @@
   "subtotal": 1600.0,
   "taxRate": 0.05,
   "taxAmount": 80.0,
-  "total": 1680.0,
-  "fileName": "test-invoice-clean.json"
+  "total": 1680.0
 }

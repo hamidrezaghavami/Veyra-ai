@@ -24,6 +24,5 @@
   "subtotal": 2800.0,
   "taxRate": 0.08,
   "taxAmount": 350.0,
-  "total": 3150.0,
-  "fileName": "test-invoice-math-error.json"
+  "total": 3150.0
 }

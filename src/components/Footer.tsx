@@ -4,6 +4,8 @@ export function Footer() {
   const { navigate } = useRouter()
 
   const handleLink = (href: string) => (e: React.MouseEvent) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
+    if (href.startsWith('#')) return
     e.preventDefault()
     if (href.startsWith('#')) {
       const el = document.querySelector(href)
@@ -46,22 +48,22 @@ export function Footer() {
             </div>
             <ul className="space-y-2.5 text-[14px]">
               <li>
-                <a href="#features" onClick={handleLink('#features')} className="hover:text-white transition-colors">
+                <a href="/#features" className="hover:text-white transition-colors">
                   Features
                 </a>
               </li>
               <li>
-                <a href="#use-cases" onClick={handleLink('#use-cases')} className="hover:text-white transition-colors">
+                <a href="/#use-cases" className="hover:text-white transition-colors">
                   Use Cases
                 </a>
               </li>
               <li>
-                <a href="#pricing" onClick={handleLink('#pricing')} className="hover:text-white transition-colors">
+                <a href="/#pricing" className="hover:text-white transition-colors">
                   Pricing
                 </a>
               </li>
               <li>
-                <a href="#faq" onClick={handleLink('#faq')} className="hover:text-white transition-colors">
+                <a href="/#faq" className="hover:text-white transition-colors">
                   FAQ
                 </a>
               </li>
@@ -112,35 +114,12 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Socials */}
-          <div>
-            <div className="text-[12px] font-semibold uppercase tracking-wider text-white mb-4">
-              Socials
-            </div>
-            <ul className="space-y-2.5 text-[14px]">
-              <li>
-                <a href="https://x.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                  X (Twitter)
-                </a>
-              </li>
-              <li>
-                <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                  LinkedIn
-                </a>
-              </li>
-              <li>
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
-                  Instagram
-                </a>
-              </li>
-            </ul>
-          </div>
         </div>
 
         {/* Bottom bar */}
         <div className="pt-8 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between text-[13px] text-neutral-500 gap-4">
           <div>
-            © 2026 Veyra AI by <span className="text-neutral-400">Kadir Calik</span>
+            © {new Date().getFullYear()} Veyra AI
           </div>
           <div className="flex items-center gap-6">
             <span>All rights reserved.</span>

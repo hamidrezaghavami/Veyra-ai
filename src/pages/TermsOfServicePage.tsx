@@ -15,7 +15,7 @@ export function TermsOfServicePage() {
             Terms of Service
           </h1>
           <p className="text-[14px] text-neutral-400">
-            Last Updated: Apr 22, 2026
+            Last Updated: November 7, 2026
           </p>
         </div>
 
@@ -30,7 +30,7 @@ export function TermsOfServicePage() {
           <section className="space-y-3">
             <h2 className="text-xl font-medium text-white">Account Responsibility</h2>
             <p>
-              You must maintain the confidentiality of your account credentials and one-time verification codes. You agree to notify us immediately of any unauthorized access to your workspace.
+              You must maintain the confidentiality of your account credentials . You agree to notify us immediately of any unauthorized access to your workspace.
             </p>
           </section>
 
@@ -51,7 +51,7 @@ export function TermsOfServicePage() {
           <section className="space-y-3">
             <h2 className="text-xl font-medium text-white">Contact</h2>
             <p>
-              If you have inquiries concerning these terms, contact <span className="text-[#21d2ed]">hello@veyra.ai</span>.
+              If you have inquiries concerning these terms, contact <a href="/contact" className="text-cyan-300 underline">our contact form</a>.
             </p>
           </section>
         </div>

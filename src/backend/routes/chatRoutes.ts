@@ -1,18 +1,11 @@
-import { Router, Request, Response } from 'express'
-import { ChatService } from '../services/chatService.ts'
-
+import { Router } from 'express'
+import { z } from 'zod'
+import { randomUUID } from 'node:crypto'
+import { db } from '../db/store.ts'
+import { GeminiClient } from '../gemini/client.ts'
 export const chatRouter = Router()
-
-chatRouter.post('/', async (req: Request, res: Response) => {
-  try {
-    const { message } = req.body
-    if (!message || typeof message !== 'string') {
-      return res.status(400).json({ success: false, error: 'Query message is required.' })
-    }
-
-    const response = await ChatService.handleUserQuery(message)
-    res.json({ success: true, data: response })
-  } catch (err: any) {
-    res.status(500).json({ success: false, error: err.message })
-  }
+chatRouter.post('/', async (req, res) => {
+  const { message } = z.object({ message: z.string().trim().min(1).max(2000) }).strict().parse(req.body)
+  const result = await GeminiClient.answerFinancialQuery(message, await db.getInvoices(res.locals.user.id))
+  res.json({ success: true, data: { id: randomUUID(), sender: 'assistant', timestamp: new Date().toISOString(), ...result } })
 })
