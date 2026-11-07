@@ -59,3 +59,14 @@ test('document extraction sends actual bytes and preserves zero tax',async()=>{
   assert.equal(result.fields.taxRate,0);assert.equal(result.fields.taxAmount,0);assert.equal(result.extractedByAI,true)
  }finally{globalThis.fetch=originalFetch;if(oldKey)process.env.GEMINI_API_KEY=oldKey;else delete process.env.GEMINI_API_KEY}
 })
+
+test('provider quota and capacity failures return actionable errors',async()=>{
+ const originalFetch=globalThis.fetch,oldKey=process.env.GEMINI_API_KEY
+ process.env.GEMINI_API_KEY='test-provider-key'
+ try{
+  for(const status of [429,503]){
+   globalThis.fetch=async()=>new Response(JSON.stringify({error:{message:'provider failure'}}),{status})
+   await assert.rejects(()=>GeminiClient.generateContent([{text:'test'}],'test'),(error:any)=>error.status===status)
+  }
+ }finally{globalThis.fetch=originalFetch;if(oldKey)process.env.GEMINI_API_KEY=oldKey;else delete process.env.GEMINI_API_KEY}
+})

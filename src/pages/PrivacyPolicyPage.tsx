@@ -47,7 +47,7 @@ export function PrivacyPolicyPage() {
 
           <section className="space-y-3">
             <h2 className="text-xl font-medium text-white">Processing and Storage</h2>
-            <p>Vercel hosts the application and Neon PostgreSQL stores accounts, extracted invoice fields, review history, contact messages, and waitlist registrations. PDF and image contents are sent to Google Gemini for extraction. Assistant questions and your ledger summaries are sent to Gemini when you use the assistant. Provider processing is subject to their applicable terms. Original upload files are not retained by Veyra. Session cookies keep you signed in; extracted records remain until deletion is requested through our contact form.</p>
+            <p>Vercel hosts the application and Neon PostgreSQL stores accounts, extracted invoice fields, review history, contact messages, and waitlist registrations. PDF and image contents are sent to Google Gemini for extraction. Assistant questions and your ledger summaries are sent to Gemini when you use the assistant. Provider processing is subject to their applicable terms. Google’s free-tier terms permit submitted content to be used to improve its products; paid-tier terms differ. Avoid uploading sensitive documents when using the free-tier service. Original upload files are not retained by Veyra. Session cookies keep you signed in; extracted records remain until deletion is requested through our contact form.</p>
           </section>
           <section className="space-y-3">
             <h2 className="text-xl font-medium text-white">Your Rights</h2>

@@ -35,7 +35,7 @@ Configure server-side environment variables:
 - `BETTER_AUTH_URL`: the exact application origin.
 - `TRUSTED_ORIGINS`: comma-separated exact allowed origins; no wildcard credentials.
 - `GEMINI_API_KEY`: enables PDF/image extraction and the financial assistant.
-- `GEMINI_MODEL`: optional model override, default `gemini-2.5-flash`.
+- `GEMINI_MODEL`: optional model override, default `gemini-3.1-flash-lite`.
 
 Apply `pnpm db:migrate` with a direct connection before releasing code. The migration creates Better Auth's version-matched tables and additive application tables. Test it on a database branch first. Do not run schema changes as a side effect of public requests. Preview deployments need a separate branch, secret, and explicit auth origin. Configure the function region near the database (Frankfurt).
 

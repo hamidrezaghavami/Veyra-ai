@@ -6,19 +6,21 @@ const apiKey = () => process.env.GEMINI_API_KEY
 export class GeminiClient {
   static async generateContent(parts: unknown[], systemInstruction: string, json = false): Promise<string> {
     if (!apiKey()) throw Object.assign(new Error('Document AI is temporarily unavailable. Please try again later.'), { status: 503 })
-    const model = process.env.GEMINI_MODEL || 'gemini-2.5-flash'
+    const model = process.env.GEMINI_MODEL || 'gemini-3.1-flash-lite'
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': apiKey()! },
       body: JSON.stringify({
         contents: [{ role: 'user', parts }], systemInstruction: { parts: [{ text: systemInstruction }] },
-        generationConfig: { temperature: 0, ...(json ? { responseMimeType: 'application/json' } : {}) },
+        generationConfig: { temperature: 0, maxOutputTokens: 8192, ...(json ? { responseMimeType: 'application/json' } : {}) },
       }),
       signal: AbortSignal.timeout(45_000),
-    })
+    }).catch(() => { throw Object.assign(new Error('The AI service took too long to respond. Please try again.'), { status: 503 }) })
     if (!response.ok) {
       console.error('Document AI request failed:', response.status)
-      throw Object.assign(new Error('The AI service could not process this request. Please try again.'), { status: 502 })
+      const status = response.status === 429 ? 429 : response.status === 503 ? 503 : 502
+      const message = status === 429 ? 'The AI request limit was reached. Please wait and try again.' : status === 503 ? 'The AI service is busy. Please try again shortly.' : 'The AI service could not process this request. Please try again.'
+      throw Object.assign(new Error(message), { status })
     }
     const result = await response.json()
     const text = result.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text || '').join('')
