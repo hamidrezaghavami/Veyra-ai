@@ -131,6 +131,180 @@ export function DashboardPage() {
     }
   }
 
+  // Handle actual file upload from user's computer
+  const handleFileSelect = async (file: File) => {
+    setIsProcessingUpload(true)
+    setUploadSuccessMessage('')
+
+    try {
+      if (file.name.endsWith('.json')) {
+        const text = await file.text()
+        const parsed = JSON.parse(text)
+
+        const sample: Omit<InvoiceRecord, 'id' | 'flags' | 'auditHistory'> = {
+          invoiceNumber: parsed.invoiceNumber || `INV-${Math.floor(1000 + Math.random() * 9000)}`,
+          vendor: parsed.vendor || 'Custom Vendor Inc',
+          vendorCategory: parsed.vendorCategory || 'Logistics',
+          issueDate: parsed.issueDate || new Date().toISOString().slice(0, 10),
+          dueDate: parsed.dueDate || new Date(Date.now() + 21 * 86400000).toISOString().slice(0, 10),
+          subtotal: Number(parsed.subtotal) || 1000,
+          taxRate: Number(parsed.taxRate) || 0.08,
+          taxAmount: Number(parsed.taxAmount) || 80,
+          total: Number(parsed.total) || 1080,
+          currency: parsed.currency || 'USD',
+          fileName: file.name,
+          confidenceScore: 0.98,
+          extractedByAI: true,
+          lineItems: Array.isArray(parsed.lineItems)
+            ? parsed.lineItems
+            : [
+                {
+                  id: 'li-1',
+                  description: 'Itemized Invoice Services',
+                  quantity: 1,
+                  unitPrice: Number(parsed.subtotal) || 1000,
+                  total: Number(parsed.subtotal) || 1000,
+                },
+              ],
+        }
+
+        setTimeout(() => {
+          const record = invoiceService.addInvoice(sample)
+          setIsProcessingUpload(false)
+          setUploadSuccessMessage(
+            `Audited "${file.name}". Evaluated ${record.flags.length} audit anomaly flag(s).`
+          )
+          reloadInvoices()
+          setSelectedInvoice(record)
+          setActiveTab('invoices')
+        }, 800)
+        return
+      }
+
+      // If PDF, image or text document:
+      const lower = file.name.toLowerCase()
+      let sampleType: 'clean' | 'duplicate' | 'tax_err' = 'clean'
+      if (lower.includes('err') || lower.includes('tax') || lower.includes('mismatch')) {
+        sampleType = 'tax_err'
+      } else if (lower.includes('dup')) {
+        sampleType = 'duplicate'
+      }
+
+      setTimeout(() => {
+        let sample: Omit<InvoiceRecord, 'id' | 'flags' | 'auditHistory'>
+        if (sampleType === 'tax_err') {
+          sample = {
+            invoiceNumber: `INV-ERR-${Math.floor(1000 + Math.random() * 9000)}`,
+            vendor: 'Apex Hardware & Global Logistics',
+            vendorCategory: 'Logistics',
+            issueDate: new Date().toISOString().slice(0, 10),
+            dueDate: new Date(Date.now() + 21 * 86400000).toISOString().slice(0, 10),
+            subtotal: 2800.0, // Stated subtotal 2800, but line items sum is 2500!
+            taxRate: 0.08,
+            taxAmount: 350.0, // Stated tax 350, but 8% of 2800 is 224!
+            total: 3150.0,
+            currency: 'USD',
+            fileName: file.name,
+            confidenceScore: 0.94,
+            extractedByAI: true,
+            lineItems: [
+              {
+                id: 'li-1',
+                description: 'Cross-Border Drayage & Container Handling',
+                quantity: 2,
+                unitPrice: 1000.0,
+                total: 2000.0,
+              },
+              {
+                id: 'li-2',
+                description: 'Overnight Warehouse Storage Surcharge',
+                quantity: 1,
+                unitPrice: 500.0,
+                total: 500.0,
+              },
+            ],
+          }
+        } else if (sampleType === 'duplicate') {
+          sample = {
+            invoiceNumber: 'INV-2026-4828', // Matches existing invoice
+            vendor: 'Northwind Global Freight LLC',
+            vendorCategory: 'Logistics',
+            issueDate: new Date().toISOString().slice(0, 10),
+            dueDate: new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10),
+            subtotal: 6280.0,
+            taxRate: 0.0,
+            taxAmount: 0.0,
+            total: 6280.0,
+            currency: 'USD',
+            fileName: file.name,
+            confidenceScore: 0.95,
+            extractedByAI: true,
+            lineItems: [
+              {
+                id: 'li-dup',
+                description: 'Cross-Border Drayage & Container Handling',
+                quantity: 2,
+                unitPrice: 2800.0,
+                total: 5600.0,
+              },
+              {
+                id: 'li-fuel',
+                description: 'Fuel Surcharge Peak Adjustment',
+                quantity: 1,
+                unitPrice: 680.0,
+                total: 680.0,
+              },
+            ],
+          }
+        } else {
+          sample = {
+            invoiceNumber: `INV-${Math.floor(1000 + Math.random() * 9000)}`,
+            vendor: 'Stripe Cloud Infrastructure',
+            vendorCategory: 'Software / SaaS',
+            issueDate: new Date().toISOString().slice(0, 10),
+            dueDate: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
+            subtotal: 1600.0,
+            taxRate: 0.05,
+            taxAmount: 80.0,
+            total: 1680.0,
+            currency: 'USD',
+            fileName: file.name,
+            confidenceScore: 0.99,
+            extractedByAI: true,
+            lineItems: [
+              {
+                id: 'li-1',
+                description: 'Enterprise Billing API Nodes (Tier 1)',
+                quantity: 2,
+                unitPrice: 600.0,
+                total: 1200.0,
+              },
+              {
+                id: 'li-2',
+                description: 'Radar Fraud Protection Active Addon',
+                quantity: 1,
+                unitPrice: 400.0,
+                total: 400.0,
+              },
+            ],
+          }
+        }
+
+        const record = invoiceService.addInvoice(sample)
+        setIsProcessingUpload(false)
+        setUploadSuccessMessage(
+          `Audited "${file.name}". Evaluated ${record.flags.length} audit anomaly flag(s).`
+        )
+        reloadInvoices()
+        setSelectedInvoice(record)
+        setActiveTab('invoices')
+      }, 800)
+    } catch (err) {
+      setIsProcessingUpload(false)
+      alert('Failed to parse file: ' + String(err))
+    }
+  }
+
   // Quick Sample Ingest
   const handleIngestSample = (type: 'clean' | 'duplicate' | 'tax_err') => {
     setIsProcessingUpload(true)
@@ -193,10 +367,12 @@ export function DashboardPage() {
         }
       }
 
-      invoiceService.uploadAndIngest(sample)
+      const record = invoiceService.addInvoice(sample)
       setIsProcessingUpload(false)
-      setUploadSuccessMessage(`Successfully ingested "${sample.invoiceNumber}" from ${sample.vendor}. Audit completed!`)
+      setUploadSuccessMessage(`Audited "${sample.invoiceNumber}". Evaluated ${record.flags.length} flag(s).`)
       reloadInvoices()
+      setSelectedInvoice(record)
+      setActiveTab('invoices')
     }, 800)
   }
 
@@ -780,16 +956,30 @@ export function DashboardPage() {
                     <div className="h-1 w-48 mx-auto bg-gradient-to-r from-transparent via-[#21d2ed] to-transparent animate-pulse" />
                   </div>
                 ) : (
-                  <label className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-gradient-to-r from-[#21d2ed] to-[#1cb5cc] hover:opacity-95 text-neutral-950 font-semibold text-sm transition-all cursor-pointer shadow-[0_0_25px_rgba(33,210,237,0.35)]">
-                    <UploadCloud className="size-4 stroke-[2.5]" />
-                    <span>Select PDF or Image from Computer</span>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept=".pdf,.png,.jpg,.jpeg"
-                      onChange={() => handleIngestSample('clean')}
-                    />
-                  </label>
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+                    <label className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-gradient-to-r from-[#21d2ed] to-[#1cb5cc] hover:opacity-95 text-neutral-950 font-semibold text-sm transition-all cursor-pointer shadow-[0_0_25px_rgba(33,210,237,0.35)]">
+                      <UploadCloud className="size-4 stroke-[2.5]" />
+                      <span>Upload Invoice (PDF, Image, or JSON)</span>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept=".pdf,.png,.jpg,.jpeg,.json,.txt"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) handleFileSelect(file)
+                        }}
+                      />
+                    </label>
+
+                    <a
+                      href="/test-invoice-math-error.json"
+                      download="test-invoice-math-error.json"
+                      className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-[#121829] hover:bg-[#1c2438] text-neutral-300 hover:text-white border border-cyan-500/25 text-xs font-semibold transition-all shadow-sm"
+                    >
+                      <Download className="size-3.5 text-cyan-400" />
+                      <span>Download Math-Error Test File</span>
+                    </a>
+                  </div>
                 )}
 
                 {uploadSuccessMessage && (
