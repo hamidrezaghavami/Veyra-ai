@@ -18,11 +18,12 @@ export function HomePage() {
     <div className="min-h-screen bg-transparent text-white overflow-x-hidden selection:bg-[#21d2ed]/30 selection:text-white relative">
       {/* Living Atmospheric Background */}
 
+      <a href="#main-content" className="skip-link">Skip to content</a>
       {/* Navigation */}
       <Navbar />
 
       {/* Main Page Flow */}
-      <main className="relative z-10">
+      <main id="main-content" className="relative z-10">
         <Hero />
         <Logos />
         <WhatWeDo />

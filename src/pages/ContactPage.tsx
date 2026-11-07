@@ -17,13 +17,18 @@ export function ContactPage() {
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.email || !formData.firstName || !formData.message) return
 
-    contactService.submit(formData)
-    setSubmitted(true)
+    if (pending) return
+    setPending(true); setError('')
+    try { await contactService.submit(formData); setSubmitted(true) }
+    catch (e) { setError(e instanceof Error ? e.message : 'Could not send your message. Please try again.') }
+    finally { setPending(false) }
   }
 
   return (
@@ -45,11 +50,12 @@ export function ContactPage() {
 
         <div className="surface-card p-6 sm:p-8 border border-white/15 shadow-2xl">
           {!submitted ? (
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4" aria-busy={pending}>
+              {error && <p role="alert" className="text-rose-300">{error}</p>}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] text-[#b0b0b0] mb-1.5">First name*</label>
-                  <input
+                  <label htmlFor="contact-firstName" className="block text-[13px] text-[#b0b0b0] mb-1.5">First name*</label>
+                  <input id="contact-firstName" name="firstName" autoComplete="given-name" maxLength={100}
                     type="text"
                     required
                     value={formData.firstName}
@@ -58,8 +64,8 @@ export function ContactPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] text-[#b0b0b0] mb-1.5">Last name*</label>
-                  <input
+                  <label htmlFor="contact-lastName" className="block text-[13px] text-[#b0b0b0] mb-1.5">Last name*</label>
+                  <input id="contact-lastName" name="lastName" autoComplete="family-name" maxLength={100}
                     type="text"
                     required
                     value={formData.lastName}
@@ -71,8 +77,8 @@ export function ContactPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-[13px] text-[#b0b0b0] mb-1.5">Email*</label>
-                  <input
+                  <label htmlFor="contact-email" className="block text-[13px] text-[#b0b0b0] mb-1.5">Email*</label>
+                  <input id="contact-email" name="email" autoComplete="email" spellCheck={false} maxLength={254}
                     type="email"
                     required
                     value={formData.email}
@@ -81,8 +87,8 @@ export function ContactPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[13px] text-[#b0b0b0] mb-1.5">Company</label>
-                  <input
+                  <label htmlFor="contact-company" className="block text-[13px] text-[#b0b0b0] mb-1.5">Company</label>
+                  <input id="contact-company" name="company" autoComplete="organization" maxLength={200}
                     type="text"
                     value={formData.company}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -92,8 +98,8 @@ export function ContactPage() {
               </div>
 
               <div>
-                <label className="block text-[13px] text-[#b0b0b0] mb-1.5">Subject*</label>
-                <input
+                <label htmlFor="contact-subject" className="block text-[13px] text-[#b0b0b0] mb-1.5">Subject*</label>
+                <input id="contact-subject" name="subject" maxLength={200}
                   type="text"
                   required
                   placeholder="e.g. Enterprise pilot inquiry or API questions"
@@ -104,8 +110,8 @@ export function ContactPage() {
               </div>
 
               <div>
-                <label className="block text-[13px] text-[#b0b0b0] mb-1.5">Your message*</label>
-                <textarea
+                <label htmlFor="contact-message" className="block text-[13px] text-[#b0b0b0] mb-1.5">Your message*</label>
+                <textarea id="contact-message" name="message" maxLength={5000}
                   rows={4}
                   required
                   value={formData.message}
@@ -115,13 +121,13 @@ export function ContactPage() {
               </div>
 
               <LiquidButton
-                type="submit"
+                type="submit" disabled={pending}
                 variant="primary"
                 size="lg"
                 className="w-full"
                 icon={<ArrowRight className="size-4" />}
               >
-                Send message
+                {pending ? 'Sending…' : 'Send Message'}
               </LiquidButton>
 
               <p className="text-[12px] text-neutral-400 text-center pt-2">
@@ -136,7 +142,7 @@ export function ContactPage() {
               <div className="size-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-2">
                 <CheckCircle2 className="size-6" />
               </div>
-              <h3 className="text-xl font-medium text-white">Message dispatched!</h3>
+              <h3 className="text-xl font-medium text-white">Message saved!</h3>
               <p className="text-[14px] text-[#b0b0b0]">
                 Thank you, {formData.firstName}. Our team will review your inquiry and follow up at <span className="text-white">{formData.email}</span> within 24 hours.
               </p>

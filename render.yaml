@@ -1,28 +1,26 @@
-# Render Blueprint Specification for Veyra AI
-# https://render.com/docs/blueprint-spec
+# Optional standalone API. The primary deployment is the same-origin Vercel function.
 services:
   - type: web
     name: veyra-ai-backend
     runtime: node
     plan: free
-    region: oregon
+    region: frankfurt
     branch: main
-    buildCommand: pnpm install
+    buildCommand: pnpm install --frozen-lockfile
     startCommand: pnpm start:backend
     healthCheckPath: /api/health
-    autoDeploy: true
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 3001
-      - key: GEMINI_API_KEY
-        sync: false
-      - key: GOOGLE_CLOUD_PROJECT
-        value: 870760192611
-      - key: GEMINI_MODEL
-        value: gemini-3.8-flash
-      - key: GEMINI_FALLBACK_MODEL
-        value: gemini-flash-latest
       - key: DATABASE_URL
         sync: false
+      - key: BETTER_AUTH_SECRET
+        sync: false
+      - key: BETTER_AUTH_URL
+        sync: false
+      - key: TRUSTED_ORIGINS
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.5-flash

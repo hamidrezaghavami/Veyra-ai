@@ -102,11 +102,11 @@ export function Hero() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 px-3 py-1 rounded-full liquid-glass-secondary border border-white/15">
                   <FileText className="size-3.5 text-[#21d2ed]" />
-                  <span className="text-[12px] font-mono text-white">INV-2026-9812.pdf</span>
+                  <span className="text-[12px] font-mono text-white">Example invoice · INV-2026-9812.pdf</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-medium backdrop-blur-md">
                   <ShieldCheck className="size-3" />
-                  <span>OCR Confidence: 99.4%</span>
+                  <span>Illustrative preview</span>
                 </div>
               </div>
 

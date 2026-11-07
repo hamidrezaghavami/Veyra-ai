@@ -1,10 +1,10 @@
 import type { Plugin } from 'vite'
-import { createBackendApp } from './app.ts'
 
 export function veyraBackendPlugin(): Plugin {
   return {
     name: 'veyra-backend-plugin',
-    configureServer(server) {
+    async configureServer(server) {
+      const { createBackendApp } = await import('./app.ts')
       const app = createBackendApp()
 
       // Handle all /api calls directly inside Vite dev server

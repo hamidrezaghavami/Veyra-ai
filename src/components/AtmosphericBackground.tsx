@@ -24,6 +24,7 @@ export function AtmosphericBackground() {
   const [hasMoved, setHasMoved] = useState(false)
 
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     // Initial center position
     mouseX.set(window.innerWidth * 0.5)
     mouseY.set(window.innerHeight * 0.35)
@@ -53,6 +54,7 @@ export function AtmosphericBackground() {
 
   // Interactive 60/120fps Canvas: Dynamic Constellation, Magnetic Grid & Kinetic Cursor Waves
   useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d', { alpha: true })

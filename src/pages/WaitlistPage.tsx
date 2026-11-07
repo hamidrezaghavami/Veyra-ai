@@ -12,16 +12,18 @@ export function WaitlistPage() {
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [position, setPosition] = useState<number>(0)
-  const [alreadyJoined, setAlreadyJoined] = useState(false)
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!email.trim() || !email.includes('@')) return
 
-    const res = waitlistService.join(email)
-    setPosition(res.position)
-    setAlreadyJoined(res.alreadyJoined)
-    setSubmitted(true)
+    if (pending) return
+    setPending(true); setError('')
+    try { const res = await waitlistService.join(email); setPosition(res.position); setSubmitted(true) }
+    catch (e) { setError(e instanceof Error ? e.message : 'Could not join the waitlist. Please try again.') }
+    finally { setPending(false) }
   }
 
   return (
@@ -49,13 +51,14 @@ export function WaitlistPage() {
             <ShaderBackground variant="Small1" className="absolute inset-0 size-full -z-10 opacity-30" />
 
             {!submitted ? (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" aria-busy={pending}>
+                {error && <p role="alert" className="text-rose-300">{error}</p>}
                 <div>
                   <label htmlFor="work-email" className="block text-[13px] text-[#b0b0b0] mb-2 font-medium">
                     Work email*
                   </label>
                   <input
-                    id="work-email"
+                    id="work-email" name="email" autoComplete="email" spellCheck={false} maxLength={254}
                     type="email"
                     required
                     placeholder="name@company.com"
@@ -66,13 +69,13 @@ export function WaitlistPage() {
                 </div>
 
                 <LiquidButton
-                  type="submit"
+                  type="submit" disabled={pending}
                   variant="primary"
                   size="lg"
                   className="w-full"
                   icon={<ArrowRight className="size-4" />}
                 >
-                  Join the waitlist
+                  {pending ? 'Joining…' : 'Join the Waitlist'}
                 </LiquidButton>
 
                 <p className="text-[12px] text-neutral-400 text-center pt-2">
@@ -88,10 +91,10 @@ export function WaitlistPage() {
                   <CheckCircle2 className="size-6" />
                 </div>
                 <h3 className="text-xl font-medium text-white">
-                  {alreadyJoined ? "You're already on the list!" : "You're on the waitlist!"}
+                  You’re on the waitlist!
                 </h3>
                 <p className="text-[14px] text-[#b0b0b0]">
-                  Your priority queue position is <span className="text-[#21d2ed] font-mono font-medium">#{position}</span>. We'll send an invitation to <span className="text-white">{email}</span> as onboarding cohorts unlock.
+                  Your registration number is <span className="text-[#21d2ed] font-mono font-medium">#{position}</span>. Updates will be associated with <span className="text-white">{email}</span>.
                 </p>
                 <div className="pt-3">
                   <LiquidButton
@@ -99,7 +102,7 @@ export function WaitlistPage() {
                     size="md"
                     onClick={() => navigate('/account')}
                   >
-                    Explore Live Product Demo →
+                    Open Your Account →
                   </LiquidButton>
                 </div>
               </div>
