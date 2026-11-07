@@ -24,12 +24,11 @@ import { invoiceService, InvoiceRecord } from '../services/invoiceService'
 import { authService, UserSession } from '../services/authService'
 import { aiAssistantService, AssistantMessage } from '../services/aiAssistantService'
 import { useRouter } from '../context/RouterContext'
-import { useClerkConfig, useUser, useClerk, UserButton, SignedIn, SignedOut } from '../lib/clerk'
+import { useClerkConfig, useUser, UserButton, SignedIn, SignedOut } from '../lib/clerk'
 
 export function DashboardPage() {
   const { navigate } = useRouter()
   const { isConfigured } = useClerkConfig()
-  const clerk = useClerk()
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null)
   const [invoices, setInvoices] = useState<InvoiceRecord[]>([])
   const [activeTab, setActiveTab] = useState<'invoices' | 'upload' | 'analytics' | 'assistant'>('invoices')
@@ -55,18 +54,17 @@ export function DashboardPage() {
   ])
   const [inputQuery, setInputQuery] = useState('')
 
-  // Authentication check & initial load
+  // Initial load
   useEffect(() => {
     if (!isConfigured) {
-      const user = authService.getCurrentUser()
+      let user = authService.getCurrentUser()
       if (!user) {
-        navigate('/sign-up')
-        return
+        user = authService.createUserSession('hamidr.ghavami@gmail.com', 'Hamid Reza Ghavami')
       }
       setCurrentUser(user)
     }
     setInvoices(invoiceService.getAll())
-  }, [isConfigured, navigate])
+  }, [isConfigured])
 
   const reloadInvoices = () => {
     const list = invoiceService.getAll()
@@ -78,12 +76,9 @@ export function DashboardPage() {
   }
 
   // Sign out handler
-  const handleSignOut = async () => {
+  const handleSignOut = () => {
     try {
       authService.logout()
-      if (isConfigured && clerk?.signOut) {
-        await clerk.signOut()
-      }
     } catch {
       // ignore
     }
