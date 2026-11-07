@@ -41,6 +41,8 @@ test('unconfigured AI returns an error instead of invented invoice data',async()
 test('analytics separate currencies and exclude rejected category spend',()=>{
  const result=summarizeLedger([clean,{...clean,id:'eur',currency:'EUR',total:20},{...clean,id:'rejected',status:'Rejected',total:30}])
  assert.equal(result.find(i=>i.currency==='USD')?.pending,100)
+ assert.equal(result.find(i=>i.currency==='USD')?.totalTracked,130)
+ assert.equal(result.find(i=>i.currency==='USD')?.totalExcludingRejected,100)
  assert.equal(result.find(i=>i.currency==='USD')?.categories.Logistics,100)
  assert.equal(result.find(i=>i.currency==='EUR')?.pending,20)
 })
