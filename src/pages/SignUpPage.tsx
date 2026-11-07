@@ -1,23 +1,29 @@
 import { useState } from 'react'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, Key, Sparkles, ShieldCheck } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
 import { LiquidButton } from '../components/LiquidButton'
-import { authService } from '../services/authService'
 import { useRouter } from '../context/RouterContext'
+import { useClerkConfig, ClerkSignUp } from '../lib/clerk'
+import { authService } from '../services/authService'
 
 export function SignUpPage() {
   const { navigate } = useRouter()
-  const [email, setEmail] = useState('')
+  const { isConfigured, saveKey } = useClerkConfig()
+  const [inputKey, setInputKey] = useState('')
+  const [demoEmail, setDemoEmail] = useState('demo.auditor@veyra.ai')
 
-  const handleSendCode = (e: React.FormEvent) => {
+  const handleConnectClerk = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!email.trim() || !email.includes('@')) return
-
-    const res = authService.requestOtp(email)
-    if (res.success) {
-      navigate('/otp')
+    if (inputKey.trim().startsWith('pk_')) {
+      saveKey(inputKey.trim())
     }
+  }
+
+  const handleInstantDemo = (e: React.FormEvent) => {
+    e.preventDefault()
+    authService.verifyOtp(demoEmail, '123456')
+    navigate('/account')
   }
 
   return (
@@ -26,61 +32,128 @@ export function SignUpPage() {
 
       <main className="flex-1 flex items-center justify-center pt-32 pb-24 px-4 sm:px-6 relative z-10">
         <div className="max-w-md w-full mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl sm:text-4xl font-medium tracking-tight text-white mb-2">
-              Sign Up
-            </h1>
-            <p className="text-[14px] text-[#b0b0b0]">
-              Enter your email and we’ll send you a secure sign-up code.
-            </p>
-          </div>
+          {isConfigured ? (
+            <div className="flex flex-col items-center justify-center">
+              <div className="text-center mb-6">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium bg-[#21d2ed]/10 text-[#21d2ed] border border-[#21d2ed]/25 mb-3">
+                  <ShieldCheck className="size-3.5" />
+                  Secured by Clerk Authentication
+                </span>
+                <h1 className="text-2xl sm:text-3xl font-medium tracking-tight text-white">
+                  Create Your Account
+                </h1>
+              </div>
 
-          <div className="surface-card p-6 sm:p-8 border border-white/15 shadow-2xl">
-            <form onSubmit={handleSendCode} className="space-y-4">
-              <div>
-                <label className="block text-[13px] text-[#b0b0b0] mb-2 font-medium">
-                  Work email
-                </label>
-                <input
-                  type="email"
-                  required
-                  autoFocus
-                  placeholder="name@company.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-4 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#21d2ed]"
+              <div className="w-full flex justify-center">
+                <ClerkSignUp
+                  routing="path"
+                  path="/sign-up"
+                  signInUrl="/sign-in"
+                  fallbackRedirectUrl="/account"
                 />
               </div>
 
-              <LiquidButton
-                type="submit"
-                variant="primary"
-                size="lg"
-                className="w-full"
-                icon={<ArrowRight className="size-4" />}
+              <button
+                onClick={() => saveKey('')}
+                className="mt-6 text-[12px] text-neutral-500 hover:text-neutral-300 underline"
               >
-                Create account
-              </LiquidButton>
-            </form>
-
-            <div className="mt-6 pt-4 border-t border-white/5 text-center text-[13px] text-neutral-400">
-              Already have an account?{' '}
-              <a
-                href="/sign-in"
-                onClick={(e) => {
-                  e.preventDefault()
-                  navigate('/sign-in')
-                }}
-                className="text-white hover:text-[#21d2ed] transition-colors"
-              >
-                Sign in
-              </a>
+                Switch or change Clerk key
+              </button>
             </div>
-          </div>
+          ) : (
+            <div>
+              <div className="text-center mb-8">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-medium bg-[#21d2ed]/10 text-[#21d2ed] border border-[#21d2ed]/25 mb-3">
+                  <Sparkles className="size-3.5" />
+                  Clerk Authentication Integration
+                </span>
+                <h1 className="text-3xl font-medium tracking-tight text-white mb-2">
+                  Create a Veyra AI Account
+                </h1>
+                <p className="text-[14px] text-[#b0b0b0]">
+                  Get full access to automated OCR extraction, 4-layer deterministic audit checks, and spend intelligence.
+                </p>
+              </div>
 
-          <div className="mt-6 text-center text-[12px] text-neutral-500">
-            Powered by FrameAuth
-          </div>
+              <div className="surface-card p-6 sm:p-8 border border-white/15 shadow-2xl mb-6">
+                <h2 className="text-[15px] font-medium text-white mb-2 flex items-center gap-2">
+                  <Key className="size-4 text-[#21d2ed]" />
+                  Connect Your Clerk Free Tier
+                </h2>
+                <p className="text-[13px] text-[#909090] mb-4">
+                  Paste your Clerk Publishable Key (`pk_test_...` or `pk_live_...`) to activate self-serve sign-up with Google, GitHub, or email:
+                </p>
+
+                <form onSubmit={handleConnectClerk} className="space-y-4">
+                  <div>
+                    <input
+                      type="text"
+                      placeholder="pk_test_..."
+                      value={inputKey}
+                      onChange={(e) => setInputKey(e.target.value)}
+                      className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-4 py-2.5 text-[13.5px] text-white focus:outline-none focus:border-[#21d2ed]"
+                    />
+                  </div>
+
+                  <LiquidButton
+                    type="submit"
+                    variant="primary"
+                    size="md"
+                    className="w-full"
+                    disabled={!inputKey.trim().startsWith('pk_')}
+                    icon={<ArrowRight className="size-4" />}
+                  >
+                    Activate Clerk Registration
+                  </LiquidButton>
+                </form>
+
+                <div className="mt-4 pt-4 border-t border-white/5 text-center text-[12px] text-neutral-400">
+                  Don't have a key yet?{' '}
+                  <a
+                    href="https://dashboard.clerk.com/sign-up"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#21d2ed] hover:underline"
+                  >
+                    Create a free Clerk project at clerk.com →
+                  </a>
+                </div>
+              </div>
+
+              {/* Instant Access Option */}
+              <div className="surface-card p-5 border border-white/10 bg-white/[0.02]">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-[13px] text-white font-medium">Quick Preview Access</span>
+                  <span className="text-[11px] px-2 py-0.5 rounded bg-white/10 text-neutral-300">No key required</span>
+                </div>
+                <form onSubmit={handleInstantDemo} className="flex gap-2">
+                  <input
+                    type="email"
+                    value={demoEmail}
+                    onChange={(e) => setDemoEmail(e.target.value)}
+                    className="flex-1 bg-[#141824]/80 border border-white/10 rounded-xl px-3 py-2 text-[13px] text-white focus:outline-none focus:border-[#21d2ed]"
+                  />
+                  <LiquidButton type="submit" variant="secondary" size="sm">
+                    Enter Dashboard
+                  </LiquidButton>
+                </form>
+              </div>
+
+              <div className="mt-6 text-center text-[13px] text-neutral-400">
+                Already have an account?{' '}
+                <a
+                  href="/sign-in"
+                  onClick={(e) => {
+                    e.preventDefault()
+                    navigate('/sign-in')
+                  }}
+                  className="text-white hover:text-[#21d2ed] transition-colors"
+                >
+                  Sign in here
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

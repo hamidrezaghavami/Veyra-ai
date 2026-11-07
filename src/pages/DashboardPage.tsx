@@ -33,6 +33,7 @@ import { aiAssistantService, AssistantMessage } from '../services/aiAssistantSer
 import { useRouter } from '../context/RouterContext'
 import { ShaderBackground } from '../components/ShaderBackground'
 import { LiquidButton } from '../components/LiquidButton'
+import { useClerkConfig, useUser, UserButton } from '../lib/clerk'
 
 export function DashboardPage() {
   const { navigate } = useRouter()
@@ -266,22 +267,13 @@ export function DashboardPage() {
             </LiquidButton>
 
             {/* User Profile Pill with Liquid Glass */}
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass-secondary text-[13px]">
-              <div className="size-5 rounded-full bg-[#21d2ed]/25 text-[#21d2ed] flex items-center justify-center text-[10px] font-semibold border border-[#21d2ed]/40">
-                KC
-              </div>
-              <span className="text-white hidden sm:inline">{currentUser?.name || 'Kadir Calik'}</span>
-              <button
-                onClick={() => {
-                  authService.logout()
-                  navigate('/sign-in')
-                }}
-                className="text-neutral-400 hover:text-white ml-1 transition-colors cursor-pointer"
-                title="Sign Out"
-              >
-                <LogOut className="size-3.5" />
-              </button>
-            </div>
+            <DashboardUserProfile
+              currentUser={currentUser}
+              onSignOut={() => {
+                authService.logout()
+                navigate('/sign-in')
+              }}
+            />
           </div>
         </div>
       </div>
@@ -858,6 +850,50 @@ export function DashboardPage() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function DashboardUserProfile({
+  currentUser,
+  onSignOut,
+}: {
+  currentUser: UserSession | null
+  onSignOut: () => void
+}) {
+  const { isConfigured } = useClerkConfig()
+  if (isConfigured) {
+    return <ClerkUserWidget />
+  }
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass-secondary text-[13px]">
+      <div className="size-5 rounded-full bg-[#21d2ed]/25 text-[#21d2ed] flex items-center justify-center text-[10px] font-semibold border border-[#21d2ed]/40">
+        {(currentUser?.name || 'KC').slice(0, 2).toUpperCase()}
+      </div>
+      <span className="text-white hidden sm:inline">{currentUser?.name || 'Kadir Calik'}</span>
+      <button
+        onClick={onSignOut}
+        className="text-neutral-400 hover:text-white ml-1 transition-colors cursor-pointer"
+        title="Sign Out"
+      >
+        <LogOut className="size-3.5" />
+      </button>
+    </div>
+  )
+}
+
+function ClerkUserWidget() {
+  const { user } = useUser()
+  const displayName =
+    user?.fullName ||
+    user?.firstName ||
+    user?.primaryEmailAddress?.emailAddress?.split('@')[0] ||
+    'Auditor'
+
+  return (
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full liquid-glass-secondary text-[13px]">
+      <UserButton />
+      <span className="text-white hidden sm:inline font-medium">{displayName}</span>
     </div>
   )
 }

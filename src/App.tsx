@@ -1,4 +1,5 @@
 import { useRouter, RouterProvider } from './context/RouterContext'
+import { VeyraClerkProvider } from './lib/clerk'
 import { AtmosphericBackground } from './components/AtmosphericBackground'
 import { HomePage } from './pages/HomePage'
 import { WaitlistPage } from './pages/WaitlistPage'
@@ -81,9 +82,11 @@ function RouteSwitcher() {
 
 export default function App() {
   return (
-    <RouterProvider>
-      <AtmosphericBackground />
-      <RouteSwitcher />
-    </RouterProvider>
+    <VeyraClerkProvider>
+      <RouterProvider>
+        <AtmosphericBackground />
+        <RouteSwitcher />
+      </RouterProvider>
+    </VeyraClerkProvider>
   )
 }

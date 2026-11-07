@@ -13,6 +13,7 @@
 | Component | Platform | Free Tier URL / Status |
 |---|---|---|
 | **Primary Website URL (Single Access)** | **Vercel** | [https://veyra-ai-lemon.vercel.app](https://veyra-ai-lemon.vercel.app) |
+| **Authentication & Users** | **Clerk** | Free Tier (`@clerk/clerk-react` + Google/GitHub/Email) |
 | **Backend REST API & Engine** | **Render** | `https://veyra-ai-backend.onrender.com` (proxied via `/api/*`) |
 | **Serverless Database** | **Neon** | PostgreSQL `neondb` (Auto-reconciled) |
 | **AI Intelligence** | **Google Cloud Gemini** | `gemini-3.8-flash` / `gemini-flash-latest` |

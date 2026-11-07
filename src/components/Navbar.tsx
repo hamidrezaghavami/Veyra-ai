@@ -3,9 +3,11 @@ import { ArrowRight, Menu, X, Sparkles } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from '../context/RouterContext'
 import { LiquidButton } from './LiquidButton'
+import { useClerkConfig, SignedIn, SignedOut, UserButton } from '../lib/clerk'
 
 export function Navbar() {
   const { path, navigate } = useRouter()
+  const { isConfigured } = useClerkConfig()
   const [scrolled, setScrolled] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -117,23 +119,60 @@ export function Navbar() {
 
           {/* Right Action Buttons */}
           <div className="hidden sm:flex items-center gap-2.5">
-            <LiquidButton
-              variant="secondary"
-              size="sm"
-              onClick={() => navigate('/sign-in')}
-              className="border-white/10"
-            >
-              Sign In
-            </LiquidButton>
-
-            <LiquidButton
-              variant="primary"
-              size="sm"
-              onClick={() => navigate('/account')}
-              icon={<ArrowRight className="size-3.5" />}
-            >
-              Get started
-            </LiquidButton>
+            {isConfigured ? (
+              <>
+                <SignedIn>
+                  <LiquidButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => navigate('/account')}
+                    className="border-white/10"
+                  >
+                    Dashboard
+                  </LiquidButton>
+                  <div className="flex items-center ml-1">
+                    <UserButton />
+                  </div>
+                </SignedIn>
+                <SignedOut>
+                  <LiquidButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => navigate('/sign-in')}
+                    className="border-white/10"
+                  >
+                    Sign In
+                  </LiquidButton>
+                  <LiquidButton
+                    variant="primary"
+                    size="sm"
+                    onClick={() => navigate('/sign-up')}
+                    icon={<ArrowRight className="size-3.5" />}
+                  >
+                    Get started
+                  </LiquidButton>
+                </SignedOut>
+              </>
+            ) : (
+              <>
+                <LiquidButton
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => navigate('/sign-in')}
+                  className="border-white/10"
+                >
+                  Sign In
+                </LiquidButton>
+                <LiquidButton
+                  variant="primary"
+                  size="sm"
+                  onClick={() => navigate('/account')}
+                  icon={<ArrowRight className="size-3.5" />}
+                >
+                  Get started
+                </LiquidButton>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
