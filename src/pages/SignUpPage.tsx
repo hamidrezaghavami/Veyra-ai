@@ -96,7 +96,7 @@ export function SignUpPage() {
                         type="text"
                         required
                         autoFocus
-                        placeholder="e.g. Hamid Reza Ghavami"
+                        placeholder="e.g. Alex Morgan"
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         className="w-full bg-[#141824]/80 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#21d2ed]"

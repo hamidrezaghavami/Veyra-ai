@@ -59,7 +59,7 @@ export function DashboardPage() {
     if (!isConfigured) {
       let user = authService.getCurrentUser()
       if (!user) {
-        user = authService.createUserSession('hamidr.ghavami@gmail.com', 'Hamid Reza Ghavami')
+        user = authService.createUserSession('controller@veyra.ai', 'Finance Controller')
       }
       setCurrentUser(user)
     }
@@ -922,7 +922,7 @@ function DashboardUserBar({
     return <ClerkUserWidget />
   }
 
-  const name = currentUser?.name || 'Auditor'
+  const name = currentUser?.name || 'Finance Controller'
   const initials = name
     .split(' ')
     .filter(Boolean)
@@ -936,7 +936,7 @@ function DashboardUserBar({
       {/* User Info Badge */}
       <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#121829] border border-cyan-500/25 text-[13px]">
         <div className="size-6 rounded-md bg-[#21d2ed]/20 text-[#21d2ed] flex items-center justify-center text-[10.5px] font-bold border border-[#21d2ed]/40">
-          {initials || 'HR'}
+          {initials || 'FC'}
         </div>
         <span className="text-white font-medium hidden sm:inline">{name}</span>
       </div>
