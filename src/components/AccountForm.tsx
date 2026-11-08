@@ -32,6 +32,7 @@ export function AccountForm({ signup = false }: { signup?: boolean }) {
         {signup && <div><label htmlFor="account-name">Full name</label><input className="form-input" id="account-name" name="name" autoComplete="name" required maxLength={200} /></div>}
         <div><label htmlFor="account-email">Email address</label><input className="form-input" id="account-email" name="email" type="email" autoComplete="email" spellCheck={false} required maxLength={254} /></div>
         <div><label htmlFor="account-password">Password</label><input className="form-input" id="account-password" name="password" type="password" autoComplete={signup ? 'new-password' : 'current-password'} minLength={signup ? 12 : 1} maxLength={128} required />{signup && <p className="text-xs text-neutral-400 mt-2">Use at least 12 characters.</p>}</div>
+        {!signup && <div className="flex justify-end"><a href="/contact?subject=Account%20recovery" className="text-sm text-cyan-300 underline underline-offset-4 hover:text-cyan-100">Forgot password?</a></div>}
         {error && <p role="alert" className="text-rose-300">{error}</p>}
         <LiquidButton type="submit" disabled={pending} className="w-full">{pending ? 'Please wait…' : signup ? 'Create Account' : 'Sign In'}</LiquidButton>
         <p className="text-sm text-neutral-400">{signup ? 'Already have an account? ' : 'New to Veyra? '}<a className="text-cyan-300 underline" href={signup ? '/sign-in' : '/sign-up'}>{signup ? 'Sign in' : 'Create an account'}</a></p>
