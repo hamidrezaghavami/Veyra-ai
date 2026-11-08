@@ -1,6 +1,7 @@
 import { useRouter, RouterProvider } from './context/RouterContext'
 import { AtmosphericBackground } from './components/AtmosphericBackground'
 import { HomePage } from './pages/HomePage'
+import { ClerkAuthProvider } from './components/ClerkAuthProvider'
 const WaitlistPage = lazy(() => import('./pages/WaitlistPage').then(module => ({ default: module.WaitlistPage })))
 const ContactPage = lazy(() => import('./pages/ContactPage').then(module => ({ default: module.ContactPage })))
 const SignInPage = lazy(() => import('./pages/SignInPage').then(module => ({ default: module.SignInPage })))
@@ -31,11 +32,11 @@ function RouteSwitcher() {
     return <ContactPage />
   }
 
-  if (path === '/sign-in') {
+  if (path === '/sign-in' || path.startsWith('/sign-in/')) {
     return <SignInPage />
   }
 
-  if (path === '/sign-up') {
+  if (path === '/sign-up' || path.startsWith('/sign-up/')) {
     return <SignUpPage />
   }
 
@@ -94,9 +95,9 @@ function MainContent() {
 export default function App() {
   return (
     <>
-      <RouterProvider>
+      <ClerkAuthProvider><RouterProvider>
         <MainContent />
-      </RouterProvider>
+      </RouterProvider></ClerkAuthProvider>
     </>
   )
 }

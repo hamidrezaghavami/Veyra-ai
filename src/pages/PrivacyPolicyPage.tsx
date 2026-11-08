@@ -34,7 +34,7 @@ export function PrivacyPolicyPage() {
               <li>Contact details: Name, work email address, and company identifier.</li>
               <li>Document data: Vendor names, invoice line items, tax IDs, and totals extracted from uploaded PDFs and images.</li>
               <li>Audit logs: Timestamps, approval actions, flagged issues, and operator comments.</li>
-              <li>Account data: Email address, name, password hash, and session records used to secure your account.</li>
+              <li>Account data: Email address, name, and account identifier used to secure your records. Clerk manages sign-in, recovery, and authentication data. Existing password records from the previous login system are retained but no longer used for sign-in.</li>
             </ul>
           </section>
 

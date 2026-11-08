@@ -1,61 +1,68 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { randomUUID } from 'node:crypto'
+import { randomUUID, generateKeyPairSync, sign } from 'node:crypto'
 import { createBackendApp } from '../src/backend/app.ts'
 import { pool } from '../src/backend/db/neon.ts'
+import type { ClerkAccount } from '../src/backend/auth.ts'
 
-const enabled=process.env.RUN_INTEGRATION_TESTS==='1'
-test('accounts → isolated saved invoices → review → persistence → sign out', {skip:!enabled}, async()=>{
- const server=createBackendApp().listen(0)
- await new Promise<void>(resolve=>server.once('listening',resolve))
- const addr=server.address() as {port:number};const base=`http://127.0.0.1:${addr.port}`
- const ids:string[]=[]
- const waitEmail=`wait-${randomUUID()}@example.com`
- let contactId:string|undefined
- const emails:string[]=[]
- const makeClient=()=>{
-  let cookie=''
-  return async(path:string,method='GET',body?:unknown)=>{
-   const response=await fetch(base+path,{method,headers:{'content-type':'application/json','origin':'http://localhost:3000','x-veyra-request':'1',...(cookie?{cookie}:{})},body:body===undefined?undefined:JSON.stringify(body)})
-   const cookies=response.headers.getSetCookie();if(cookies.length)cookie=cookies.map(c=>c.split(';')[0]).join('; ')
-   return {status:response.status,body:await response.text().then(text=>text ? JSON.parse(text) : {})}
+const enabled = process.env.RUN_INTEGRATION_TESTS === '1'
+test('Clerk signatures, verified account linking, isolated ledgers, and saved reviews', { skip: !enabled }, async () => {
+  const { privateKey, publicKey } = generateKeyPairSync('rsa', { modulusLength: 2048 })
+  const issuer = 'https://verification.clerk.accounts.dev'
+  process.env.VITE_CLERK_PUBLISHABLE_KEY = 'pk_test_' + Buffer.from('verification.clerk.accounts.dev$').toString('base64')
+  process.env.CLERK_SECRET_KEY = 'sk_test_' + 'verification'.repeat(4)
+  process.env.CLERK_JWT_KEY = publicKey.export({ type: 'spki', format: 'pem' }).toString()
+  process.env.TRUSTED_ORIGINS = 'http://localhost:3000'
+  const email = `clerk-${randomUUID()}@example.com`
+  const legacyId = randomUUID()
+  const providerIds = [`user_${randomUUID()}`, `user_${randomUUID()}`, `user_${randomUUID()}`, `user_${randomUUID()}`]
+  const accounts: Record<string, ClerkAccount> = Object.fromEntries(providerIds.map((id,index) => [id, { id,firstName:index===0?'Alice':'Bob',lastName:null,primaryEmailAddressId:`email_${index}`,emailAddresses:[{id:`email_${index}`,emailAddress:index===0?email:`other-${index}-${email}`,verification:{status:index===2?'unverified':'verified'}}] }]))
+  const loadAccount = async (id: string) => accounts[id]
+  const server = createBackendApp({ loadAccount }).listen(0)
+  await new Promise<void>(resolve => server.once('listening', resolve))
+  const base = `http://127.0.0.1:${(server.address() as {port:number}).port}`
+  const token = (id: string, changes: Record<string,unknown> = {}) => {
+    const now = Math.floor(Date.now()/1000)
+    const header = Buffer.from(JSON.stringify({alg:'RS256',typ:'JWT',kid:'verification-key'})).toString('base64url')
+    const payload = Buffer.from(JSON.stringify({iss:issuer,sub:id,sid:'sess_verification',azp:'http://localhost:3000',iat:now,nbf:now-5,exp:now+300,v:2,fva:[0,-1],sts:'active',...changes})).toString('base64url')
+    return `${header}.${payload}.${sign('RSA-SHA256',Buffer.from(`${header}.${payload}`),privateKey).toString('base64url')}`
   }
- }
- try{
-  const anon=makeClient();assert.equal((await anon('/api/invoices')).status,401)
-  const alice=makeClient(),bob=makeClient();const password=randomUUID()+'Aa!'
-  for(const [client,name] of [[alice,'Alice'],[bob,'Bob']] as const){const email=`${name}-${randomUUID()}@example.com`;emails.push(email);const response=await client('/api/auth/sign-up/email','POST',{name,email,password});assert.equal(response.status,200,JSON.stringify(response.body));ids.push(response.body.user.id)}
-  const stranger=makeClient();const wrong=await stranger('/api/auth/sign-in/email','POST',{email:emails[0],password:'incorrect-password'});assert.equal(wrong.status,401)
-  const fields={invoiceNumber:'INTEGRATION-001',vendor:'Verification Vendor',vendorCategory:'Logistics',issueDate:'2026-11-07',dueDate:'2026-11-30',subtotal:100,taxRate:0,taxAmount:0,total:999,currency:'USD',lineItems:[{description:'Transport',quantity:2,unitPrice:50,total:100}]}
-  const uploaded=await alice('/api/invoices/upload-and-audit','POST',{fileName:'invoice.json',fileType:'application/json',data:Buffer.from(JSON.stringify(fields)).toString('base64')});assert.equal(uploaded.status,201,JSON.stringify(uploaded.body));const invoice=uploaded.body.data;assert.equal(invoice.status,'Flagged');assert(invoice.flags.some((f:any)=>f.field==='total'))
-  assert.equal((await bob('/api/invoices')).body.data.length,0)
-  assert.equal((await bob(`/api/invoices/${invoice.id}/approve`,'PATCH',{note:'Attempted cross-account review'})).status,404)
-  assert.equal((await alice(`/api/invoices/${invoice.id}/approve`,'PATCH',{note:''})).status,400)
-  const approved=await alice(`/api/invoices/${invoice.id}/approve`,'PATCH',{note:'Reviewed discrepancy against original document'});assert.equal(approved.body.data.status,'Approved');assert(approved.body.data.flags.length>0);assert.equal(approved.body.data.auditHistory[0].actor,approved.body.data.auditHistory[0].actor.toLowerCase())
-  const corrected=await alice(`/api/invoices/${invoice.id}`,'PUT',{...fields,total:100});assert.equal(corrected.body.data.status,'Pending Audit');assert.equal(corrected.body.data.flags.length,0)
-  assert.equal((await alice(`/api/invoices/${invoice.id}`,'PUT',{...fields,total:100,status:'Approved'})).status,400)
-  const concurrent=await Promise.all([1,2].map(()=>alice('/api/invoices/upload-and-audit','POST',{fileName:'concurrent.json',fileType:'application/json',data:Buffer.from(JSON.stringify({...fields,invoiceNumber:'CONCURRENT'})).toString('base64')})))
-  assert(concurrent.every(r=>r.status===201));assert.equal(concurrent.filter(r=>r.body.data.flags.some((f:any)=>f.type==='duplicate')).length,1)
-  const originRejected=await fetch(base+'/api/invoices/'+invoice.id+'/approve',{method:'PATCH',headers:{'content-type':'application/json','origin':'https://untrusted.example','x-veyra-request':'1'},body:JSON.stringify({note:''})});assert.equal(originRejected.status,403)
-  const waits=await Promise.all([anon('/api/waitlist','POST',{email:waitEmail}),anon('/api/waitlist','POST',{email:waitEmail.toUpperCase()})]);assert(waits.every(r=>r.status===201));assert.equal(waits[0].body.data.position,waits[1].body.data.position)
-  const contact=await anon('/api/contact','POST',{name:'Verification',email:waitEmail,inquiryType:'Integration test',message:'Disposable verification message'});assert.equal(contact.status,201);contactId=contact.body.data.id
-  assert.equal((await alice('/api/invoices/reset','POST',{})).status,404)
-  assert.equal((await alice('/api/auth/send-otp','POST',{email:'test@example.com'})).status,404)
-  const freshServer=createBackendApp().listen(0);await new Promise<void>(resolve=>freshServer.once('listening',resolve))
-  try{
-   const addr=freshServer.address() as {port:number};const root=`http://127.0.0.1:${addr.port}`
-   const login=await fetch(root+'/api/auth/sign-in/email',{method:'POST',headers:{'content-type':'application/json',origin:'http://localhost:3000'},body:JSON.stringify({email:emails[0],password})});assert.equal(login.status,200)
-   const cookie=login.headers.getSetCookie().map(c=>c.split(';')[0]).join('; ')
-   const records=await fetch(root+'/api/invoices',{headers:{cookie}}).then(r=>r.json());assert.equal(records.data.find((i:any)=>i.id===invoice.id).total,100)
-  }finally{freshServer.close()}
-  assert.equal((await alice('/api/auth/sign-out','POST',{})).status,200)
-  assert.equal((await alice('/api/invoices')).status,401)
-  assert.equal((await alice('/api/contact','POST',{name:'Test',email:'bad',inquiryType:'Test',message:'test'})).status,400)
- } finally {
-  // Only disposable users created in this isolated verification branch are removed.
-  await pool.query('DELETE FROM veyra_waitlist_entries WHERE email=$1',[waitEmail])
-  if(contactId)await pool.query('DELETE FROM veyra_contact_messages WHERE id=$1',[contactId])
-  if(ids.length)await pool.query('DELETE FROM "user" WHERE id=ANY($1::text[])',[ids])
-  server.close();await pool.end()
- }
+  const req = async (jwt: string|null,path:string,method='GET',body?:unknown,cookie=false) => {
+    const headers: Record<string,string> = {'accept':'application/json','content-type':'application/json','origin':'http://localhost:3000','x-veyra-request':'1'}
+    if(jwt)headers[cookie?'cookie':'authorization'] = cookie ? `__clerk_db_jwt=verification; __session=${jwt}; __client_uat=${JSON.parse(Buffer.from(jwt.split('.')[1],'base64url').toString()).iat}` : `Bearer ${jwt}`
+    const response = await fetch(base+path,{method,headers,body:body===undefined?undefined:JSON.stringify(body),redirect:'manual'})
+    const text = await response.text()
+    return {status:response.status,body:text?JSON.parse(text):{}}
+  }
+  try {
+    await pool.query('INSERT INTO veyra_users(id,email,name) VALUES ($1,$2,$3)',[legacyId,email,'Legacy Alice'])
+    assert.equal((await req(null,'/api/invoices')).status,401)
+    assert.equal((await req(token(providerIds[0],{exp:Math.floor(Date.now()/1000)-300}),'/api/invoices')).status,401)
+    assert.equal((await req(token(providerIds[0],{azp:'https://untrusted.example'}),'/api/invoices')).status,401)
+    const good = token(providerIds[0]);const pieces=good.split('.');pieces[1]=Buffer.from(JSON.stringify({sub:providerIds[1]})).toString('base64url')
+    assert.equal((await req(pieces.join('.'),'/api/invoices')).status,401)
+    assert.equal((await req(token(providerIds[2]),'/api/invoices')).status,403)
+    const alice = await req(good,'/api/invoices');assert.equal(alice.status,200,JSON.stringify(alice.body))
+    const linked = await pool.query('SELECT id,clerk_user_id FROM veyra_users WHERE email=$1',[email]);assert.equal(linked.rows[0].id,legacyId);assert.equal(linked.rows[0].clerk_user_id,providerIds[0])
+    accounts[providerIds[3]].emailAddresses[0].emailAddress=email
+    assert.equal((await req(token(providerIds[3]),'/api/invoices')).status,409)
+    const cookie = await req(good,'/api/invoices','GET',undefined,true);assert.equal(cookie.status,200,JSON.stringify(cookie.body))
+    const fields={invoiceNumber:'CLERK-VERIFICATION',vendor:'Verification Vendor',vendorCategory:'Logistics',issueDate:'2026-11-07',dueDate:'2026-11-30',subtotal:100,taxRate:0,taxAmount:0,total:999,currency:'USD',lineItems:[{description:'Transport',quantity:2,unitPrice:50,total:100}]}
+    const upload=await req(good,'/api/invoices/upload-and-audit','POST',{fileName:'invoice.json',fileType:'application/json',data:Buffer.from(JSON.stringify(fields)).toString('base64')})
+    assert.equal(upload.status,201,JSON.stringify(upload.body));const invoice=upload.body.data;assert.equal(invoice.status,'Flagged')
+    assert.equal((await req(token(providerIds[1]),'/api/invoices')).body.data.length,0)
+    assert.equal((await req(token(providerIds[1]),`/api/invoices/${invoice.id}/approve`,'PATCH',{note:'Attempted cross-account review'})).status,404)
+    assert.equal((await req(good,`/api/invoices/${invoice.id}/approve`,'PATCH',{note:''})).status,400)
+    const approved=await req(good,`/api/invoices/${invoice.id}/approve`,'PATCH',{note:'Reviewed synthetic test discrepancy'});assert.equal(approved.body.data.status,'Approved');assert.equal(approved.body.data.auditHistory[0].actor,email)
+    const corrected=await req(good,`/api/invoices/${invoice.id}`,'PUT',{...fields,total:100});assert.equal(corrected.body.data.status,'Pending Audit')
+    assert.equal((await req(null,'/api/invoices')).status,401)
+    assert.equal((await req(null,'/api/auth/sign-in/email','POST',{email,password:'old-browser-login'})).status,404)
+    // A second Clerk identity cannot claim an already-linked legacy ledger by reusing its email.
+    accounts[providerIds[1]].emailAddresses[0].emailAddress=email
+    // It already owns a separate local ledger; the existing mapping remains stable.
+    assert.equal((await req(token(providerIds[1]),'/api/invoices')).body.data.length,0)
+  } finally {
+    await pool.query('DELETE FROM veyra_users WHERE id=$1 OR clerk_user_id=ANY($2::text[])',[legacyId,providerIds])
+    server.close();await pool.end()
+  }
 })

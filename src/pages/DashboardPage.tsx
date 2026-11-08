@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { authClient } from '../services/authService'
+import { useSession } from '../services/authService'
+import { UserButton, useClerk } from '@clerk/react'
 import { invoiceService } from '../services/invoiceService'
 import type { InvoiceRecord, ChatMessage } from '../backend/types'
 import { aiAssistantService } from '../services/aiAssistantService'
@@ -11,9 +12,8 @@ type Tab = 'invoices'|'upload'|'analytics'|'assistant'
 const tabs: [Tab,string][] = [['invoices','Audit Ledger'],['upload','Upload Document'],['analytics','Spend Analytics'],['assistant','AI Assistant']]
 const query = () => new URLSearchParams(window.location.search)
 export function DashboardPage() {
-  const [session, setSession] = useState<typeof authClient.$Infer.Session | null>(null)
-  const [checkingSession, setCheckingSession] = useState(true)
-  const [sessionError, setSessionError] = useState(false)
+  const { data: session, isPending: checkingSession } = useSession()
+  const { signOut } = useClerk()
   const { navigate } = useRouter()
   const [tab, setTab] = useState<Tab>((query().get('tab') as Tab) || 'invoices')
   const [status, setStatus] = useState(query().get('status') || 'all')
@@ -33,15 +33,8 @@ export function DashboardPage() {
     for (const key of ['veyra_auth_user','veyra_pending_otp','veyra_invoices_v1','veyra_clerk_pubkey']) localStorage.removeItem(key)
   }, [])
   useEffect(() => {
-    let active = true
-    authClient.getSession().then(result => {
-      if (!active) return
-      if (result.error) setSessionError(true)
-      else if (result.data) setSession(result.data)
-      else navigate('/sign-in')
-    }).catch(() => { if(active)setSessionError(true) }).finally(() => { if(active)setCheckingSession(false) })
-    return () => { active = false }
-  }, [navigate])
+    if (!checkingSession && !session) navigate('/sign-in')
+  }, [checkingSession, session?.user.id, navigate])
   useEffect(() => {
     let active = true
     setInvoices([]); setSelected(null); setMessages([])
@@ -84,16 +77,14 @@ export function DashboardPage() {
     catch (e) { setError(e instanceof Error ? e.message : 'Assistant unavailable. Please try again.') }
     finally { setBusy(false) }
   }
-  if (sessionError) return <main className="max-w-lg mx-auto p-8 pt-24"><h1 className="text-2xl">Unable to verify your session</h1><p role="alert" className="my-4">Please check your connection and try again.</p><button className="action-button" onClick={() => location.reload()}>Try Again</button></main>
   if (checkingSession || !session) return <main className="p-12 text-center" role="status">Checking your account…</main>
 
   return <div className="min-h-screen bg-[#080c15] text-white">
     <header className="border-b border-white/10 bg-[#0d1220] p-4 sm:px-8 flex flex-wrap items-center justify-between gap-4">
       <a href="/" className="text-xl font-semibold">Veyra AI</a>
-      <div className="flex items-center gap-4"><span className="text-sm text-neutral-300">{session.user.name}</span><button className="action-button" onClick={async () => {
-        const result = await authClient.signOut()
-        if (result.error) { setError('Could not sign out. Please try again.'); return }
-        setInvoices([]); setSelected(null); navigate('/sign-in')
+      <div className="flex items-center gap-4"><span className="text-sm text-neutral-300">{session.user.name}</span><UserButton /><button className="action-button" onClick={async () => {
+        try { await signOut({ redirectUrl: '/sign-in' }); setInvoices([]); setSelected(null) }
+        catch { setError('Could not sign out. Please try again.') }
       }}>Sign Out</button></div>
     </header>
     <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
