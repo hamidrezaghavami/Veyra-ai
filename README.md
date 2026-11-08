@@ -4,7 +4,7 @@ Invoice extraction, deterministic audit checks, and a recorded human review work
 
 ## Running locally
 
-Use Node 22.19+ or Node 24 and pnpm 12.18. Copy `.env.example` to `.env` and fill in the server-only values. `BETTER_AUTH_SECRET` must be a randomly generated secret of at least 32 characters. Use an isolated PostgreSQL database for development.
+Use Node 22.19+ or Node 24 and pnpm 12.18. Copy `.env.example` to `.env` and configure Clerk keys from the same Clerk instance. Only `VITE_CLERK_PUBLISHABLE_KEY` is public; keep `CLERK_SECRET_KEY` server-only. Use an isolated PostgreSQL database for development.
 
 ```sh
 pnpm install --frozen-lockfile
@@ -22,7 +22,7 @@ pnpm test
 pnpm build
 ```
 
-`pnpm test` runs deterministic audit, validation, extraction error, and CSV safety tests. `pnpm test:integration` verifies accounts, wrong-password rejection, account isolation, saved uploads, approval history, correction invalidation, logout, and persistence through a fresh app instance against an isolated test database. Set `RUN_INTEGRATION_TESTS=1` and point `DATABASE_URL` at a verification branch. Never run integration tests against a database containing customer accounts.
+`pnpm test` runs deterministic audit, validation, extraction error, and CSV safety tests. `pnpm test:integration` verifies signed Clerk tokens, rejected invalid sessions, verified email linking, account isolation, saved uploads, approval history, and correction invalidation against an isolated test database. Set `RUN_INTEGRATION_TESTS=1` and point `DATABASE_URL` at a verification branch. Never run integration tests against a database containing customer accounts.
 
 ## Deployment
 
@@ -31,15 +31,15 @@ The Vercel project serves the Vite frontend and `api/index.ts` together. `vercel
 Configure server-side environment variables:
 
 - `DATABASE_URL`: pooled PostgreSQL URL for application requests.
-- `BETTER_AUTH_SECRET`: a unique cryptographically random secret.
-- `BETTER_AUTH_URL`: the exact application origin.
+- `CLERK_SECRET_KEY`: server-only Clerk API key.
+- `VITE_CLERK_PUBLISHABLE_KEY`: public Clerk key, available at build time and on the server.
 - `TRUSTED_ORIGINS`: comma-separated exact allowed origins; no wildcard credentials.
 - `GEMINI_API_KEY`: enables PDF/image extraction and the financial assistant.
 - `GEMINI_MODEL`: optional model override, default `gemini-3.1-flash-lite`.
 
-Apply `pnpm db:migrate` with a direct connection before releasing code. The migration creates Better Auth's version-matched tables and additive application tables. Test it on a database branch first. Do not run schema changes as a side effect of public requests. Preview deployments need a separate branch, secret, and explicit auth origin. Configure the function region near the database (Frankfurt).
+Apply `pnpm db:migrate` with a direct connection before releasing code. The migrations create application tables, copy legacy account identifiers, and preserve existing invoice ownership. Legacy authentication tables remain intact. Test it on a database branch first. Do not run schema changes as a side effect of public requests. Preview deployments need a separate database branch, Clerk instance, and explicit trusted origin. Configure the function region near the database (Frankfurt).
 
-Each account owns its invoices. There is no shared demo ledger, browser-created session, reset endpoint, or unauthenticated invoice API. Review actors come from the authenticated server session. There are no organization-sharing or dual-approval claims. Authentication uses Better Auth email/password with HTTP-only session cookies and database-backed rate limiting. Password recovery and social login are not offered without a configured provider.
+Each account owns its invoices. There is no shared demo ledger, browser-created session, reset endpoint, or unauthenticated invoice API. Review actors come from the authenticated server session. There are no organization-sharing or dual-approval claims. Authentication uses Clerk prebuilt sign-in, sign-up, recovery, and account controls. Enable Google in the Clerk dashboard to offer Google sign-in. Clerk production requires a domain you own and production OAuth credentials; a `*.vercel.app` URL can only use a development instance for testing. The owner has chosen to use the development instance on the main Vercel address for now, accepting its development limits. This is not Clerk production mode. Existing users must create a Clerk account with their existing email and verify it to reconnect to saved records; legacy passwords are not migrated. The API verifies Clerk sessions and loads verified primary emails from Clerk; verified existing emails link to their original ledger, and linked ledgers cannot be reassigned to another Clerk identity.
 
 Documents are limited to 2.8 MB to stay within serverless request limits. PDF and image contents are sent to Gemini; original files are not stored. Structured JSON imports do not use AI. Unreadable fields and AI/provider failures return errors instead of invented invoices. All amounts and dates are validated before persistence. Audit checks detect duplicate candidates, incorrect line totals, subtotal discrepancies, tax mismatches (including zero tax), grand total mismatches, and high-value amounts in the stated currency. No exchange rates or VAT jurisdiction rules are assumed. Review findings stay in the history after approval; flagged approvals require an explanation. Any correction resets approval.
 

@@ -1,8 +1,9 @@
 import express from 'express'
-import { toNodeHandler, fromNodeHeaders } from 'better-auth/node'
+import { clerkMiddleware, getAuth } from '@clerk/express'
 import { createHash } from 'node:crypto'
 import { ZodError } from 'zod'
-import { auth } from './auth.ts'
+import { loadClerkAccount, resolveLedgerOwner } from './auth.ts'
+import type { ClerkAccount } from './auth.ts'
 import { pool, checkDatabase } from './db/neon.ts'
 import { invoiceRouter } from './routes/invoiceRoutes.ts'
 import { chatRouter } from './routes/chatRoutes.ts'
@@ -10,7 +11,14 @@ import { formRouter } from './routes/formRoutes.ts'
 import { summarizeLedger } from '../shared/analytics.ts'
 import { db } from './db/store.ts'
 
-export function createBackendApp() {
+function trustedOrigins() {
+  const origins = (process.env.TRUSTED_ORIGINS || 'http://localhost:3000').split(',').map(s => s.trim())
+  // Only trust this deployment's exact platform-issued preview host.
+  if (process.env.VERCEL_ENV === 'preview' && process.env.VERCEL_URL) origins.push(`https://${process.env.VERCEL_URL}`)
+  return origins
+}
+
+export function createBackendApp(options: { loadAccount?: (id: string) => Promise<ClerkAccount> } = {}) {
   const app = express()
   app.disable('x-powered-by')
   app.set('trust proxy', 1)
@@ -26,11 +34,10 @@ export function createBackendApp() {
       res.status(503).json({ status: 'unavailable', application: 'veyra-ai', error: 'The database is unavailable.' })
     }
   })
-  app.all('/api/auth/*splat', toNodeHandler(auth))
   app.use(express.json({ limit: '4mb' }))
   app.use('/api', (req, res, next) => {
     if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method)) {
-      const allowed = (process.env.TRUSTED_ORIGINS || process.env.BETTER_AUTH_URL || 'http://localhost:3000').split(',').map(s => s.trim())
+      const allowed = trustedOrigins()
       if (req.get('x-veyra-request') !== '1' || (req.get('origin') && !allowed.includes(req.get('origin')!))) {
         res.status(403).json({ success: false, error: 'Request origin could not be verified.' })
         return
@@ -54,13 +61,28 @@ export function createBackendApp() {
     } catch (error) { next(error) }
   }
   app.use('/api', limit('public', 100), formRouter)
-  app.use(['/api/invoices', '/api/chat', '/api/analytics'], async (req, res, next) => {
-    const session = await auth.api.getSession({ headers: fromNodeHeaders(req.headers) })
-    if (!session) {
+  const protectedPaths = ['/api/invoices', '/api/chat', '/api/analytics']
+  app.use(protectedPaths, (req, res, next) => {
+    if (!process.env.CLERK_SECRET_KEY || !process.env.VITE_CLERK_PUBLISHABLE_KEY) {
+      res.status(503).json({ success: false, error: 'Sign-in is temporarily unavailable. Please try again later.' })
+      return
+    }
+    return clerkMiddleware({
+      publishableKey: process.env.VITE_CLERK_PUBLISHABLE_KEY,
+      secretKey: process.env.CLERK_SECRET_KEY,
+      jwtKey: process.env.CLERK_JWT_KEY,
+      authorizedParties: trustedOrigins(),
+    })(req, res, next)
+  })
+  app.use(protectedPaths, async (req, res, next) => {
+    const session = getAuth(req)
+    if (!session.isAuthenticated || !session.userId) {
       res.status(401).json({ success: false, error: 'Please sign in to access your records.' })
       return
     }
-    res.locals.user = session.user
+    const account = await (options.loadAccount || loadClerkAccount)(session.userId)
+    if (account.id !== session.userId) throw Object.assign(new Error('Account identity could not be verified.'), { status: 403 })
+    res.locals.user = await resolveLedgerOwner(account)
     next()
   })
   app.use('/api/invoices/upload-and-audit', limit('upload', 10))

@@ -1,4 +1,10 @@
-import { createAuthClient } from 'better-auth/react'
-export const authClient = createAuthClient()
-export const { useSession } = authClient
-// Account credentials and sessions are verified by the server. No browser-created tokens.
+import { useUser } from '@clerk/react'
+
+// Same-origin API requests automatically include Clerk's signed session cookie.
+export function useSession() {
+  const { user, isLoaded } = useUser()
+  return {
+    data: user ? { user: { id: user.id, name: user.fullName || user.firstName || 'Your account', email: user.primaryEmailAddress?.emailAddress || '' } } : null,
+    isPending: !isLoaded,
+  }
+}
