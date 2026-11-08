@@ -8,12 +8,13 @@ import { useRouter } from '../context/RouterContext'
 
 export function ContactPage() {
   const { navigate } = useRouter()
+  const accountRecovery = new URLSearchParams(window.location.search).get('subject') === 'Account recovery'
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     company: '',
-    subject: '',
+    subject: accountRecovery ? 'Account recovery' : '',
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
@@ -41,10 +42,10 @@ export function ContactPage() {
             <span>Contact</span>
           </div>
           <h1 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05] mb-4">
-            Contact Veyra AI.
+            {accountRecovery ? 'Recover your account.' : 'Contact Veyra AI.'}
           </h1>
           <p className="text-[16px] text-[#b0b0b0]">
-            Have a question or need help? We'll get back to you shortly.
+            {accountRecovery ? 'Enter your account email and describe the access issue. Never include your password in this message.' : "Have a question or need help? We'll get back to you shortly."}
           </p>
         </div>
 
