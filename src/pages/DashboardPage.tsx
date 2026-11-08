@@ -106,9 +106,7 @@ export function DashboardPage() {
           <h2 className="text-xl mb-4">Upload an invoice or receipt</h2><p className="text-neutral-400 mb-6">PDF, PNG, JPEG, WebP, or structured invoice JSON. Maximum 2.8 MB. AI reads the document contents; you review every result.</p>
           <label htmlFor="invoice-file" className="block mb-3">Choose document</label><input ref={fileInput} id="invoice-file" name="document" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.json" disabled={busy} onChange={e => upload(e.target.files?.[0])} className="block max-w-full" />
           {busy && <p role="status" className="text-cyan-300 mt-5">Reading document and checking calculations…</p>}
-          <div className="flex flex-wrap gap-3 mt-5"><a className="action-button" href="/invoice-clean-sample.pdf" download>Clean Sample PDF</a><a className="action-button" href="/invoice-math-error-sample.pdf" download>Sample PDF with Errors</a></div>
-          <div className="flex flex-wrap gap-3 mt-5"><a className="action-button" href="/invoice-clean-sample.pdf" download>Clean Sample PDF</a><a className="action-button" href="/invoice-math-error-sample.pdf" download>Sample PDF with Errors</a></div>
-          <p className="text-sm text-neutral-400 mt-6">Document contents are sent to Google Gemini for extraction. Google’s free-tier terms permit use of submitted content to improve its products. Use sample or non-sensitive documents. The original file is not retained; extracted fields and audit history are saved.</p>
+          <p className="text-sm text-neutral-400 mt-6">Document contents are sent to Google Gemini for extraction. Google’s free-tier terms permit use of submitted content to improve its products. Use non-sensitive documents. The original file is not retained; extracted fields and audit history are saved.</p>
         </section>}
         {tab === 'analytics' && <div className="space-y-6">{!invoices.length && <p>Upload invoices to see your spending.</p>}{currencies.map(currency => {
           const group = invoices.filter(i => i.currency===currency)
