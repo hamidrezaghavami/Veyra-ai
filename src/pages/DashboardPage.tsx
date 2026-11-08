@@ -7,15 +7,21 @@ import type { InvoiceRecord, ChatMessage } from '../backend/types'
 import { aiAssistantService } from '../services/aiAssistantService'
 import { useRouter } from '../context/RouterContext'
 import { formatMoney, downloadLedger } from '../shared/export'
+import { FileText, BarChart3, MessageSquare, Search, Download, LogOut, ArrowRight, ArrowLeft, Plus, X, Check, AlertCircle } from 'lucide-react'
+import { EmptyInvoices, InvoiceUpload, StatusBadge, statusLabels } from '../components/DashboardPrimitives'
+import { summarizeLedger } from '../shared/analytics'
 
 type Tab = 'invoices'|'upload'|'analytics'|'assistant'
-const tabs: [Tab,string][] = [['invoices','Audit Ledger'],['upload','Upload Document'],['analytics','Spend Analytics'],['assistant','AI Assistant']]
+const navigation = [{ key: 'invoices', label: 'Invoices', icon: FileText }, { key: 'analytics', label: 'Spending', icon: BarChart3 }, { key: 'assistant', label: 'Assistant', icon: MessageSquare }] as const
+const titles: Record<Tab, [string,string]> = { invoices: ['Your invoices', 'Upload, review, and keep everything in order.'], upload: ['Upload an invoice', 'We’ll read the details. You make the final call.'], analytics: ['Your spending', 'A clearer view of the invoices you’ve saved.'], assistant: ['Ask your assistant', 'Get answers from your saved invoices.'] }
 const query = () => new URLSearchParams(window.location.search)
+const dateFormatter = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
+const displayDate = (value: string) => dateFormatter.format(new Date(value + 'T00:00:00'))
 export function DashboardPage() {
   const { data: session, isPending: checkingSession } = useSession()
   const { signOut } = useClerk()
   const { navigate } = useRouter()
-  const [tab, setTab] = useState<Tab>((query().get('tab') as Tab) || 'invoices')
+  const [tab, setTab] = useState<Tab>(() => { const value = query().get('tab'); return value && Object.keys(titles).includes(value) ? value as Tab : 'invoices' })
   const [status, setStatus] = useState(query().get('status') || 'all')
   const [search, setSearch] = useState(query().get('search') || '')
   const [invoices, setInvoices] = useState<InvoiceRecord[]>([])
@@ -27,6 +33,7 @@ export function DashboardPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [question, setQuestion] = useState('')
   const fileInput = useRef<HTMLInputElement>(null)
+  const questionInput = useRef<HTMLTextAreaElement>(null)
 
   useEffect(() => {
     // Remove legacy demo records so they cannot be mistaken for saved account data.
@@ -51,11 +58,17 @@ export function DashboardPage() {
     history.replaceState({}, '', `${location.pathname}?${params}`)
   }, [tab, status, search])
 
-  const visible = useMemo(() => invoices.filter(i => (status === 'all' || i.status === status) && `${i.vendor} ${i.invoiceNumber}`.toLowerCase().includes(search.toLowerCase())), [invoices,status,search])
-  const currencies = [...new Set(invoices.map(i => i.currency))].sort()
+  useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }) }, [tab])
+
+  const visible = useMemo(() => invoices.filter(i => (status === 'all' || (status === 'review' ? ['Pending Audit','Flagged'].includes(i.status) : i.status === status)) && `${i.vendor} ${i.invoiceNumber}`.toLowerCase().includes(search.toLowerCase())), [invoices,status,search])
+  const summaries = useMemo(() => summarizeLedger(invoices), [invoices])
+  const reviewCount = invoices.filter(i => ['Pending Audit','Flagged'].includes(i.status)).length
+  const approvedCount = invoices.filter(i => i.status === 'Approved').length
+  const go = (next: Tab) => { setTab(next); setError(''); setNotice('') }
   const replaceInvoice = (record: InvoiceRecord) => {
     setInvoices(list => list.map(i => i.id === record.id ? record : i))
     setSelected(record)
+    setNotice(record.status === 'Approved' ? 'Invoice approved.' : record.status === 'Rejected' ? 'Invoice rejected.' : 'Invoice updated. Check the details before approving.')
   }
   const upload = async (file?: File) => {
     if (!file || busy) return
@@ -79,45 +92,38 @@ export function DashboardPage() {
   }
   if (checkingSession || !session) return <main className="p-12 text-center" role="status">Checking your account…</main>
 
-  return <div className="min-h-screen bg-[#080c15] text-white">
-    <header className="border-b border-white/10 bg-[#0d1220] p-4 sm:px-8 flex flex-wrap items-center justify-between gap-4">
-      <a href="/" className="text-xl font-semibold">Veyra AI</a>
-      <div className="flex items-center gap-4"><span className="text-sm text-neutral-300">{session.user.name}</span><UserButton /><button className="action-button" onClick={async () => {
-        try { await signOut({ redirectUrl: '/sign-in' }); setInvoices([]); setSelected(null) }
-        catch { setError('Could not sign out. Please try again.') }
-      }}>Sign Out</button></div>
-    </header>
-    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
-      <nav aria-label="Workspace" className="flex flex-wrap gap-2 mb-8">{tabs.map(([key,label]) => <button key={key} aria-current={tab===key ? 'page' : undefined} onClick={() => { setTab(key); setError('') }} className={`action-button ${tab===key ? '!border-cyan-400 !text-cyan-300' : ''}`}>{label}</button>)}</nav>
-      <h1 className="text-3xl mb-3">{tabs.find(([key]) => key===tab)?.[1] || 'Audit Ledger'}</h1>
-      <p className="text-neutral-400 mb-6">Your documents, findings, and review history are saved to your account.</p>
-      {error && <div role="alert" className="rounded-xl border border-rose-400/40 bg-rose-400/10 text-rose-200 p-4 mb-5">{error}</div>}
-      <p role="status" className="text-emerald-300 mb-4">{notice}</p>
-      {loading ? <p role="status">Loading invoices…</p> : <>
+  return <div className="workspace">
+    <a href="#workspace-main" className="ws-skip">Skip to content</a>
+    <aside className="ws-sidebar">
+      <a href="/" className="ws-brand"><span className="ws-brand-mark" aria-hidden="true">v</span>veyra<span className="ws-brand-dot">.</span></a>
+      <p className="ws-nav-caption">Workspace</p>
+      <nav aria-label="Workspace" className="ws-nav">{navigation.map(({key,label,icon: Icon}) => <button key={key} aria-current={(tab === key || key === 'invoices' && tab === 'upload') ? 'page' : undefined} onClick={() => go(key)}><Icon size={18} strokeWidth={1.7} aria-hidden="true" /><span>{label}</span>{key === 'invoices' && reviewCount > 0 && <span className="ws-nav-count" aria-label={`${reviewCount} need review`}>{reviewCount}</span>}</button>)}</nav>
+      <div className="ws-sidebar-footer"><div className="ws-account"><UserButton /><div><span>{session.user.name}</span><small>Personal workspace</small></div></div><button className="ws-signout" onClick={async () => { try { await signOut({ redirectUrl: '/sign-in' }); setInvoices([]); setSelected(null) } catch { setError('Could not sign out. Please try again.') } }}><LogOut size={15} aria-hidden="true" />Sign out</button></div>
+    </aside>
+    <div className="ws-body"><header className="ws-topbar"><span className="ws-breadcrumb">Workspace <span aria-hidden="true">/</span> {tab === 'upload' ? 'New invoice' : navigation.find(item => item.key === tab)?.label}</span><span className="ws-saved"><span aria-hidden="true" />Saved to your account</span></header>
+    <main id="workspace-main" className="ws-main">
+      {tab === 'upload' && <button className="ws-back" onClick={() => go('invoices')}><ArrowLeft size={14} aria-hidden="true" />Back to invoices</button>}
+      <div className="ws-page-heading"><div><p className="ws-eyebrow">{tab === 'upload' ? 'Step 1 of 3' : 'Your workspace'}</p><h1>{titles[tab][0]}</h1><p>{titles[tab][1]}</p></div>{tab !== 'upload' && <button className="ws-button ws-primary" disabled={busy} onClick={() => go('upload')}><Plus size={16} aria-hidden="true" />Upload invoice</button>}</div>
+      {error && <div role="alert" className="ws-alert"><AlertCircle size={18} aria-hidden="true" /><span>{error}</span><button aria-label="Dismiss error" onClick={() => setError('')}><X size={16} aria-hidden="true" /></button></div>}
+      {notice && <p role="status" className="ws-notice"><Check size={16} aria-hidden="true" />{notice}</p>}
+      {loading ? <div className="ws-loading" role="status">Loading your invoices…</div> : <>
         {tab === 'invoices' && <>
-          <div className="flex flex-wrap gap-4 mb-6">
-            <div className="flex-1 min-w-48"><label htmlFor="ledger-search">Search invoices</label><input id="ledger-search" className="form-input" type="search" value={search} onChange={e => setSearch(e.target.value)} placeholder="Vendor or invoice number…" /></div>
-            <div><label htmlFor="ledger-status">Status</label><select id="ledger-status" className="form-input" value={status} onChange={e => setStatus(e.target.value)}>{['all','Pending Audit','Flagged','Approved','Rejected'].map(s => <option key={s} value={s}>{s==='all' ? 'All Statuses' : s}</option>)}</select></div>
-            <button className="action-button self-end" disabled={!visible.length} onClick={() => downloadLedger(visible)}>Export CSV</button>
-          </div>
-          {!visible.length ? <div className="surface-card p-8 text-center"><h2 className="text-xl mb-3">{invoices.length ? 'No matching invoices' : 'Your ledger is empty'}</h2><p className="text-neutral-400 mb-5">{invoices.length ? 'Try a different search or status.' : 'Upload an invoice to begin your first review.'}</p><button className="action-button" onClick={() => setTab('upload')}>Upload Document</button></div> : <div className="overflow-x-auto surface-card"><table className="w-full min-w-[680px] text-left text-sm"><caption className="sr-only">Your invoice ledger</caption><thead className="bg-white/5"><tr>{['Invoice','Vendor','Amount','Status','Review'].map(title => <th scope="col" className="p-4" key={title}>{title}</th>)}</tr></thead><tbody>{visible.map(i => <tr key={i.id} className="border-t border-white/10"><td className="p-4 break-words max-w-56">{i.invoiceNumber}<span className="block text-xs text-neutral-400">{i.issueDate}</span></td><td className="p-4 break-words max-w-64">{i.vendor}</td><td className="p-4 tabular-nums whitespace-nowrap">{formatMoney(i.total,i.currency)}</td><td className="p-4">{i.status}{i.flags.length > 0 && <span className="block text-amber-300 text-xs">{i.flags.length} finding(s) retained</span>}</td><td className="p-4"><button className="action-button" onClick={() => setSelected(i)} aria-label={`Review invoice ${i.invoiceNumber}`}>Review</button></td></tr>)}</tbody></table></div>}
+          <div className="ws-stats">{([{ label: 'Total invoices', value: invoices.length, filter: 'all', hint: 'All your documents' }, { label: 'Needs review', value: reviewCount, filter: 'review', hint: reviewCount ? 'Ready for your decision' : 'You’re all caught up' }, { label: 'Approved', value: approvedCount, filter: 'Approved', hint: 'Reviewed and confirmed' }]).map(stat => <button key={stat.label} className="ws-stat" onClick={() => { setStatus(stat.filter); setSearch('') }}><span>{stat.label}<ArrowRight size={14} aria-hidden="true" /></span><strong>{stat.value}</strong><small>{stat.hint}</small></button>)}</div>
+          {!invoices.length ? <EmptyInvoices onUpload={() => go('upload')} /> : <section className="ws-invoice-panel" aria-label="Saved invoices">
+            <div className="ws-table-tools"><div className="ws-search"><Search size={16} aria-hidden="true" /><label htmlFor="ledger-search" className="sr-only">Search invoices</label><input id="ledger-search" name="invoice-search" autoComplete="off" type="search" value={search} onChange={event => setSearch(event.target.value)} placeholder="Search vendor or invoice…" /></div><label htmlFor="ledger-status" className="sr-only">Filter by status</label><select id="ledger-status" className="ws-select" value={status} onChange={event => setStatus(event.target.value)}><option value="all">All statuses</option><option value="review">Needs review</option>{(['Pending Audit','Flagged','Approved','Rejected'] as const).map(value => <option key={value} value={value}>{value === 'Pending Audit' ? 'Not yet reviewed' : statusLabels[value]}</option>)}</select><button className="ws-button ws-secondary ws-export" disabled={!visible.length} onClick={() => downloadLedger(visible)}><Download size={15} aria-hidden="true" />Export<span className="sr-only"> CSV</span></button></div>
+            {!visible.length ? <div className="ws-no-results"><h2>No invoices found</h2><p>Try another search or clear your filters.</p><button className="ws-button ws-secondary" onClick={() => { setStatus('all'); setSearch('') }}>Clear filters</button></div> : <><div className="ws-table-scroll"><table className="ws-table"><caption className="sr-only">Your saved invoices. Select Review to check details and make a decision.</caption><thead><tr>{['Invoice','Vendor','Amount','Status',''].map((label,index) => <th scope="col" key={index}>{label || <span className="sr-only">Review</span>}</th>)}</tr></thead><tbody>{visible.map(invoice => <tr key={invoice.id}><td><span className="ws-invoice-id">{invoice.invoiceNumber}</span><small>{displayDate(invoice.issueDate)}</small></td><td>{invoice.vendor}</td><td className="ws-amount">{formatMoney(invoice.total,invoice.currency)}</td><td><StatusBadge status={invoice.status} /></td><td><button className="ws-review-link" onClick={() => setSelected(invoice)} aria-label={`Review invoice ${invoice.invoiceNumber}`}>Review<ArrowRight size={14} aria-hidden="true" /></button></td></tr>)}</tbody></table></div><div className="ws-mobile-invoices">{visible.map(invoice => <article key={invoice.id}><div className="ws-mobile-invoice-heading"><h2>{invoice.vendor}</h2><strong>{formatMoney(invoice.total,invoice.currency)}</strong></div><p>{invoice.invoiceNumber} · {displayDate(invoice.issueDate)}</p><div className="ws-mobile-invoice-bottom"><StatusBadge status={invoice.status} /><button className="ws-review-link" onClick={() => setSelected(invoice)} aria-label={`Review invoice ${invoice.invoiceNumber}`}>Review<ArrowRight size={14} aria-hidden="true" /></button></div></article>)}</div></>}
+            <div className="ws-table-footer">{visible.length} of {invoices.length} {invoices.length === 1 ? 'invoice' : 'invoices'}<span>Saved to your account</span></div>
+          </section>}
         </>}
-        {tab === 'upload' && <section className="surface-card max-w-2xl p-6 sm:p-10">
-          <h2 className="text-xl mb-4">Upload an invoice or receipt</h2><p className="text-neutral-400 mb-6">PDF, PNG, JPEG, WebP, or structured invoice JSON. Maximum 2.8 MB. AI reads the document contents; you review every result.</p>
-          <label htmlFor="invoice-file" className="block mb-3">Choose document</label><input ref={fileInput} id="invoice-file" name="document" type="file" accept=".pdf,.png,.jpg,.jpeg,.webp,.json" disabled={busy} onChange={e => upload(e.target.files?.[0])} className="block max-w-full" />
-          {busy && <p role="status" className="text-cyan-300 mt-5">Reading document and checking calculations…</p>}
-          <p className="text-sm text-neutral-400 mt-6">Document contents are sent to Google Gemini for extraction. Google’s free-tier terms permit use of submitted content to improve its products. Use non-sensitive documents. The original file is not retained; extracted fields and audit history are saved.</p>
-        </section>}
-        {tab === 'analytics' && <div className="space-y-6">{!invoices.length && <p>Upload invoices to see your spending.</p>}{currencies.map(currency => {
-          const group = invoices.filter(i => i.currency===currency)
-          const approved = group.filter(i => i.status==='Approved').reduce((sum,i) => sum+i.total,0)
-          const pending = group.filter(i => !['Approved','Rejected'].includes(i.status)).reduce((sum,i) => sum+i.total,0)
-          const categories = group.filter(i => i.status !== 'Rejected').reduce((out,i) => {out[i.vendorCategory]=(out[i.vendorCategory]||0)+i.total;return out},{} as Record<string,number>)
-          return <section className="surface-card p-6" key={currency}><h2 className="text-xl mb-5">{currency} Ledger</h2><div className="grid sm:grid-cols-3 gap-5 mb-8">{[['Approved',approved],['Awaiting Review',pending],['Rejected',group.filter(i => i.status==='Rejected').reduce((sum,i)=>sum+i.total,0)]].map(([label,amount]) => <div key={label}><p className="text-neutral-400 text-sm">{label}</p><p className="text-2xl tabular-nums mt-2">{formatMoney(Number(amount),currency)}</p></div>)}</div><h3 className="text-lg mb-4">By Category (Excluding Rejected)</h3>{Object.entries(categories).sort((a,b)=>b[1]-a[1]).map(([category,amount]) => <div key={category} className="flex justify-between gap-4 border-t border-white/10 py-3"><span>{category}</span><span className="tabular-nums">{formatMoney(amount,currency)}</span></div>)}</section>
-        })}</div>}
-        {tab === 'assistant' && <section className="surface-card max-w-3xl p-6"><p className="text-neutral-400 mb-5">Ask about your saved ledger. Answers may contain mistakes; review invoice records before making decisions.</p><div className="max-h-[50vh] overflow-y-auto space-y-4 mb-6" role="log" aria-label="Financial assistant conversation" aria-live="polite">{messages.map(m => <div key={m.id} className={`rounded-xl p-4 whitespace-pre-wrap break-words ${m.sender==='user' ? 'bg-cyan-400/10' : 'bg-white/5'}`}><p className="text-xs text-neutral-400 mb-2">{m.sender==='user' ? 'You' : 'Veyra Assistant'}</p>{m.text}</div>)}</div><form onSubmit={ask}><label htmlFor="assistant-question">Your question</label><textarea id="assistant-question" className="form-input" rows={3} maxLength={2000} value={question} onChange={e=>setQuestion(e.target.value)} required /><button className="action-button mt-4" disabled={busy}>{busy ? 'Thinking…' : 'Ask Assistant'}</button></form></section>}
+        {tab === 'upload' && <InvoiceUpload inputRef={fileInput} busy={busy} onUpload={upload} />}
+        {tab === 'analytics' && <div className="ws-analytics">{!invoices.length ? <section className="ws-empty"><div className="ws-empty-icon"><BarChart3 size={26} strokeWidth={1.5} aria-hidden="true" /></div><h2>Your spending starts with an invoice.</h2><p>Upload your first invoice to see totals and categories here.</p><button className="ws-button ws-primary" onClick={() => go('upload')}>Upload invoice<ArrowRight size={15} aria-hidden="true" /></button></section> : <><p className="ws-section-note">Each currency is shown separately. Category totals exclude rejected invoices.</p>{summaries.map(summary => {
+          const categories = Object.entries(summary.categories).sort((a,b) => b[1]-a[1])
+          const largest = Math.max(0,...categories.map(([,amount]) => amount))
+          return <section className="ws-spending-card" key={summary.currency}><div className="ws-section-heading"><h2>{summary.currency} spending</h2><span>{summary.count} {summary.count === 1 ? 'invoice' : 'invoices'}</span></div><div className="ws-spending-totals">{[['Approved',summary.approved],['Needs review',summary.pending+summary.flagged],['Rejected',summary.rejected]].map(([label,amount]) => <div key={label}><span>{label}</span><strong>{formatMoney(Number(amount),summary.currency)}</strong></div>)}</div><h3>By category</h3>{categories.length ? categories.map(([category,amount]) => <div key={category} className="ws-category"><div><span>{category}</span><strong>{formatMoney(amount,summary.currency)}</strong></div><div className="ws-bar" aria-hidden="true"><span style={{width:`${largest > 0 ? amount/largest*100 : 0}%`}} /></div></div>) : <p className="ws-section-note">No spending to show after excluding rejected invoices.</p>}</section>
+        })}</>}</div>}
+        {tab === 'assistant' && <section className="ws-assistant"><div className="ws-conversation" role="log" aria-label="Invoice assistant conversation" aria-live="polite">{!messages.length ? <div className="ws-assistant-welcome"><div className="ws-empty-icon"><MessageSquare size={26} strokeWidth={1.5} aria-hidden="true" /></div><h2>What would you like to know?</h2><p>Ask a question about your invoices or spending.</p><div className="ws-prompts">{['Which invoices need my review?', 'Summarize my spending by currency.', 'What issues were found in my invoices?'].map(prompt => <button key={prompt} onClick={() => { setQuestion(prompt); questionInput.current?.focus() }}>{prompt}<ArrowRight size={14} aria-hidden="true" /></button>)}</div></div> : messages.map(message => <div key={message.id} className={`ws-message ws-message-${message.sender}`}><span>{message.sender === 'user' ? 'You' : 'Veyra'}</span><p>{message.text}</p></div>)}{busy && <p role="status" className="ws-thinking">Looking through your invoices…</p>}</div><form onSubmit={ask} className="ws-compose"><label htmlFor="assistant-question" className="sr-only">Ask about your invoices</label><textarea ref={questionInput} id="assistant-question" name="question" autoComplete="off" placeholder="Ask about your invoices…" rows={2} maxLength={2000} value={question} onChange={event => setQuestion(event.target.value)} required /><button className="ws-button ws-primary" disabled={busy || !question.trim()} type="submit" aria-label="Send question"><ArrowRight size={18} aria-hidden="true" /></button></form><p className="ws-assistant-note">AI can make mistakes. Check the invoice before making a decision.</p></section>}
       </>}
-    </div>
+    </main></div>
     {selected && <ReviewDialog invoice={selected} onClose={() => setSelected(null)} onSave={replaceInvoice} />}
   </div>
 }
@@ -143,20 +149,21 @@ function ReviewDialog({ invoice, onClose, onSave }: {invoice: InvoiceRecord; onC
     } catch(e) { setError(e instanceof Error ? e.message : 'Could not save this review.') }
     finally { setPending(false) }
   }
-  return <dialog ref={dialog} onCancel={event => { if(pending)event.preventDefault(); else onClose() }} aria-labelledby="invoice-review-title" className="w-[calc(100%-2rem)] max-w-3xl max-h-[90vh] overflow-y-auto overscroll-contain rounded-2xl bg-[#111827] border border-white/15 text-white p-6 sm:p-8 backdrop:bg-black/75">
-    <div className="flex items-start justify-between gap-4 mb-5"><h2 id="invoice-review-title" className="text-2xl">Review {invoice.invoiceNumber}</h2><button type="button" className="action-button" disabled={pending} onClick={onClose}>Close</button></div>
-    <p className="text-neutral-400 mb-5">{invoice.vendor} · {invoice.status} · {formatMoney(invoice.total,invoice.currency)}</p>
+  return <dialog ref={dialog} onCancel={event => { if(pending)event.preventDefault(); else onClose() }} aria-labelledby="invoice-review-title" className="ws-dialog">
+    <div className="flex items-start justify-between gap-4 mb-5"><h2 id="invoice-review-title" className="text-2xl">Review invoice</h2><button type="button" className="action-button" disabled={pending} onClick={onClose}>Close</button></div>
+    <p className="text-neutral-400 mb-5">{invoice.vendor} · {invoice.invoiceNumber} · {formatMoney(invoice.total,invoice.currency)}</p>
+    <div className="ws-review-summary"><StatusBadge status={invoice.status} /><span>{invoice.flags.length ? `${invoice.flags.length} ${invoice.flags.length === 1 ? 'issue' : 'issues'} to check below` : 'Check the extracted details before approving.'}</span></div>
     {invoice.flags.map(f => <p key={f.id} className="text-amber-200 border border-amber-400/20 rounded-lg p-3 mb-3">{f.message}</p>)}
     <form onSubmit={submit} aria-busy={pending}>
       {editing ? <><p className="text-sm text-neutral-400 mb-4">Corrections re-run validation and reset approval.</p><div className="grid sm:grid-cols-2 gap-4">{(['vendor','invoiceNumber','issueDate','dueDate','currency','subtotal','taxRate','taxAmount','total'] as const).map(field => <div key={field}><label htmlFor={`edit-${field}`}>{({vendor:'Vendor',invoiceNumber:'Invoice Number',issueDate:'Issue Date',dueDate:'Due Date',currency:'Currency',subtotal:'Subtotal',taxRate:'Tax Rate (Fraction)',taxAmount:'Tax Amount',total:'Total'})[field]}</label><input id={`edit-${field}`} className="form-input" type={typeof draft[field]==='number' ? 'number' : field.endsWith('Date') ? 'date' : 'text'} step="any" min={typeof draft[field]==='number' ? 0 : undefined} required value={draft[field]} onChange={e=>setDraft({...draft,[field]:typeof draft[field]==='number' ? Number(e.target.value) : e.target.value})}/></div>)}</div><h3 className="text-lg mt-6 mb-3">Line Items</h3>{draft.lineItems.map((line,index) => <fieldset key={index} className="border border-white/10 p-3 rounded-xl mb-3"><legend className="text-sm">Item {index+1}</legend>{(['description','quantity','unitPrice','total'] as const).map(field => <div key={field}><label htmlFor={`line-${index}-${field}`}>{({description:'Description',quantity:'Quantity',unitPrice:'Unit Price',total:'Line Total'})[field]}</label><input id={`line-${index}-${field}`} className="form-input" type={field==='description' ? 'text' : 'number'} step="any" required min={field==='quantity' ? 0.000001 : field==='description' ? undefined : 0} value={line[field]} onChange={e=>setDraft({...draft,lineItems:draft.lineItems.map((l,j)=>j===index ? {...l,[field]:field==='description' ? e.target.value : Number(e.target.value)} : l)})} /></div>)}</fieldset>)}</> : <>
-        <dl className="grid grid-cols-2 gap-3 mb-5"><dt>Issue Date</dt><dd>{invoice.issueDate}</dd><dt>Due Date</dt><dd>{invoice.dueDate}</dd><dt>Subtotal</dt><dd>{formatMoney(invoice.subtotal,invoice.currency)}</dd><dt>Tax</dt><dd>{formatMoney(invoice.taxAmount,invoice.currency)} ({invoice.taxRate*100}%)</dd></dl>
+        <dl className="grid grid-cols-2 gap-3 mb-5"><dt>Issue Date</dt><dd>{displayDate(invoice.issueDate)}</dd><dt>Due Date</dt><dd>{displayDate(invoice.dueDate)}</dd><dt>Subtotal</dt><dd>{formatMoney(invoice.subtotal,invoice.currency)}</dd><dt>Tax</dt><dd>{formatMoney(invoice.taxAmount,invoice.currency)} ({invoice.taxRate*100}%)</dd></dl>
         <div className="overflow-x-auto"><table className="w-full text-sm mb-6"><caption className="sr-only">Invoice line items</caption><thead><tr><th scope="col" className="text-left p-2">Description</th><th scope="col" className="p-2">Quantity</th><th scope="col" className="p-2">Unit Price</th><th scope="col" className="p-2">Total</th></tr></thead><tbody>{invoice.lineItems.map(l=><tr key={l.id} className="border-t border-white/10"><td className="p-2">{l.description}</td><td className="p-2 text-right">{l.quantity}</td><td className="p-2 text-right">{formatMoney(l.unitPrice,invoice.currency)}</td><td className="p-2 text-right">{formatMoney(l.total,invoice.currency)}</td></tr>)}</tbody></table></div>
         <label htmlFor="review-action">Review decision</label><select id="review-action" className="form-input" value={action} onChange={e=>setAction(e.target.value as typeof action)}><option value="approve">Approve</option><option value="reject">Reject</option><option value="flag">Flag for Review</option></select>
         <label htmlFor="review-note" className="block mt-4">Review note {action==='approve' && !invoice.flags.length ? '(optional)' : '(required)'}</label><textarea id="review-note" className="form-input" rows={3} maxLength={2000} required={action!=='approve'||invoice.flags.length>0} minLength={action==='approve'&&invoice.flags.length>0 ? 10 : 1} value={note} onChange={e=>setNote(e.target.value)} />
       </>}
       {error && <p role="alert" className="text-rose-300 mt-4">{error}</p>}
-      <div className="flex flex-wrap gap-3 mt-5"><button type="submit" className="action-button !text-cyan-300" disabled={pending}>{pending ? 'Saving…' : editing ? 'Save Corrections' : 'Confirm Decision'}</button><button type="button" className="action-button" disabled={pending} onClick={()=>setEditing(!editing)}>{editing ? 'Cancel Editing' : 'Correct Fields'}</button></div>
+      <div className="flex flex-wrap gap-3 mt-5"><button type="submit" className="action-button !text-cyan-300" disabled={pending}>{pending ? 'Saving…' : editing ? 'Save Corrections' : 'Save decision'}</button><button type="button" className="action-button" disabled={pending} onClick={()=>setEditing(!editing)}>{editing ? 'Cancel Editing' : 'Edit invoice details'}</button></div>
     </form>
-    <h3 className="text-lg mt-8 mb-3">Audit History</h3><ol className="space-y-3">{invoice.auditHistory.map(h=><li key={h.id} className="border-t border-white/10 pt-3 text-sm"><p>{h.action}</p><p className="text-neutral-400">{h.actor} · {new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'short'}).format(new Date(h.timestamp))}</p>{h.note && <p className="mt-1 break-words">{h.note}</p>}</li>)}</ol>
+    <details className="ws-history"><summary>Review history</summary><ol className="space-y-3">{invoice.auditHistory.map(h=><li key={h.id} className="border-t border-white/10 pt-3 text-sm"><p>{h.action}</p><p className="text-neutral-400">{h.actor} · {new Intl.DateTimeFormat(undefined,{dateStyle:'medium',timeStyle:'short'}).format(new Date(h.timestamp))}</p>{h.note && <p className="mt-1 break-words">{h.note}</p>}</li>)}</ol></details>
   </dialog>
 }
