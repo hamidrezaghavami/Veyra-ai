@@ -1,9 +1,10 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { randomUUID, generateKeyPairSync, sign } from 'node:crypto'
-import { createBackendApp } from '../src/backend/app.ts'
-import { pool } from '../src/backend/db/neon.ts'
-import type { ClerkAccount } from '../src/backend/auth.ts'
+import { createBackendApp } from '../src/backend/app.js'
+import { pool } from '../src/backend/db/neon.js'
+import { GeminiClient } from '../src/backend/gemini/client.js'
+import type { ClerkAccount } from '../src/shared/types.ts'
 
 const enabled = process.env.RUN_INTEGRATION_TESTS === '1'
 test('Clerk signatures, verified account linking, isolated ledgers, and saved reviews', { skip: !enabled }, async () => {
@@ -37,6 +38,11 @@ test('Clerk signatures, verified account linking, isolated ledgers, and saved re
   try {
     await pool.query('INSERT INTO veyra_users(id,email,name) VALUES ($1,$2,$3)',[legacyId,email,'Legacy Alice'])
     assert.equal((await req(null,'/api/invoices')).status,401)
+    assert.equal((await req(null,'/api/waitlist','POST',{email:'invalid'})).status,400)
+    const waitlist=await req(null,'/api/waitlist','POST',{email});assert.equal(waitlist.status,201);assert.equal(typeof waitlist.body.data.position,'number')
+    assert.equal((await req(null,'/api/contact','POST',{name:'Verification',email,inquiryType:'Test',message:'Isolated integration check'})).status,201)
+    assert.equal((await pool.query('SELECT count(*)::int AS n FROM veyra_waitlist_entries WHERE email=$1',[email])).rows[0].n,1)
+    assert.equal((await pool.query("SELECT count(*)::int AS n FROM veyra_contact_messages WHERE data->>'email'=$1",[email])).rows[0].n,1)
     assert.equal((await req(token(providerIds[0],{exp:Math.floor(Date.now()/1000)-300}),'/api/invoices')).status,401)
     assert.equal((await req(token(providerIds[0],{azp:'https://untrusted.example'}),'/api/invoices')).status,401)
     const good = token(providerIds[0]);const pieces=good.split('.');pieces[1]=Buffer.from(JSON.stringify({sub:providerIds[1]})).toString('base64url')
@@ -55,6 +61,24 @@ test('Clerk signatures, verified account linking, isolated ledgers, and saved re
     assert.equal((await req(good,`/api/invoices/${invoice.id}/approve`,'PATCH',{note:''})).status,400)
     const approved=await req(good,`/api/invoices/${invoice.id}/approve`,'PATCH',{note:'Reviewed synthetic test discrepancy'});assert.equal(approved.body.data.status,'Approved');assert.equal(approved.body.data.auditHistory[0].actor,email)
     const corrected=await req(good,`/api/invoices/${invoice.id}`,'PUT',{...fields,total:100});assert.equal(corrected.body.data.status,'Pending Audit')
+    const originalGenerate = GeminiClient.generateContent
+    try {
+      GeminiClient.generateContent = async (parts: unknown[], instruction: string) => {
+        const serialized=JSON.stringify(parts)
+        if(serialized.includes('inlineData')) {
+          assert(serialized.includes('application/pdf'))
+          return JSON.stringify({...fields,invoiceNumber:'JS-PDF-CHECK',total:100})
+        }
+        assert(instruction.includes('Server-calculated currency totals'))
+        assert(instruction.includes('JS-PDF-CHECK'))
+        return 'Verified assistant response using the signed-in account ledger.'
+      }
+      const pdf=await req(good,'/api/invoices/upload-and-audit','POST',{fileName:'verification.pdf',fileType:'application/pdf',data:Buffer.from('%PDF-isolated-test').toString('base64')})
+      assert.equal(pdf.status,201,JSON.stringify(pdf.body));assert.equal(pdf.body.data.extractedByAI,true)
+      const chat=await req(good,'/api/chat','POST',{message:'Summarize my invoices.'})
+      assert.equal(chat.status,200,JSON.stringify(chat.body));assert.equal(chat.body.data.sender,'assistant');assert.match(chat.body.data.text,/Verified assistant response/)
+      assert.equal((await req(token(providerIds[1]),'/api/invoices')).body.data.length,0)
+    } finally { GeminiClient.generateContent=originalGenerate }
     assert.equal((await req(null,'/api/invoices')).status,401)
     assert.equal((await req(null,'/api/auth/sign-in/email','POST',{email,password:'old-browser-login'})).status,404)
     // A second Clerk identity cannot claim an already-linked legacy ledger by reusing its email.
@@ -62,6 +86,8 @@ test('Clerk signatures, verified account linking, isolated ledgers, and saved re
     // It already owns a separate local ledger; the existing mapping remains stable.
     assert.equal((await req(token(providerIds[1]),'/api/invoices')).body.data.length,0)
   } finally {
+    await pool.query('DELETE FROM veyra_waitlist_entries WHERE email=$1',[email])
+    await pool.query("DELETE FROM veyra_contact_messages WHERE data->>'email'=$1",[email])
     await pool.query('DELETE FROM veyra_users WHERE id=$1 OR clerk_user_id=ANY($2::text[])',[legacyId,providerIds])
     server.close();await pool.end()
   }

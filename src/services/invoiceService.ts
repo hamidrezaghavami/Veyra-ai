@@ -1,6 +1,6 @@
 import { api } from './api'
-export type { InvoiceRecord, AuditFlag, AuditAction, LineItem } from '../backend/types'
-import type { InvoiceRecord } from '../backend/types'
+export type { InvoiceRecord, AuditFlag, AuditAction, LineItem } from '../shared/types'
+import type { InvoiceRecord } from '../shared/types'
 export const invoiceService = {
   getAll: () => api<InvoiceRecord[]>('/invoices'),
   async upload(file: File) {

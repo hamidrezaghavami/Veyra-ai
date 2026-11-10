@@ -1,4 +1,4 @@
-import type { InvoiceRecord } from '../backend/types'
+import type { InvoiceRecord } from './types'
 export const formatMoney = (value: number, currency: string) => new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(value)
 export function csvCell(value: unknown) {
   let text = String(value ?? '')
