@@ -12,21 +12,26 @@ pnpm db:migrate
 pnpm dev
 ```
 
-The Vite development server mounts the same Express API used in production at `/api`. No separate backend is needed for local development. `pnpm start:backend` is available for a standalone API.
+The Vite development server mounts the same Express API used in production at `/api`. No separate backend is needed for local development. `pnpm start:backend` starts the standalone API directly with Node.js (`node src/backend/index.js`); `pnpm dev:backend` uses Node’s built-in watch mode. All executable code under `src/backend` is JavaScript ES modules. No TypeScript loader or compilation is needed to run the backend.
+
+The shared audit and analytics helpers are JavaScript because both the server and frontend use them. Type-only frontend contracts live in `src/shared/types.ts`; the frontend and development/build tooling remain TypeScript.
 
 ## Checks
 
 ```sh
 pnpm typecheck
 pnpm test
+pnpm test:backend
 pnpm build
 ```
+
+`pnpm test:backend` runs the actual JavaScript API in plain Node with TypeScript execution disabled, checks health error handling, and verifies origin protection without connecting to a database.
 
 `pnpm test` runs deterministic audit, validation, extraction error, and CSV safety tests. `pnpm test:integration` verifies signed Clerk tokens, rejected invalid sessions, verified email linking, account isolation, saved uploads, approval history, and correction invalidation against an isolated test database. Set `RUN_INTEGRATION_TESTS=1` and point `DATABASE_URL` at a verification branch. Never run integration tests against a database containing customer accounts.
 
 ## Deployment
 
-The Vercel project serves the Vite frontend and `api/index.ts` together. `vercel.json` routes API requests to that function and browser paths to `index.html`, so direct links and refreshes work. Do not proxy this project to the previous Render URL.
+The Vercel project serves the Vite frontend and `api/index.js` together. `vercel.json` routes API requests to that function and browser paths to `index.html`, so direct links and refreshes work. Do not proxy this project to the previous Render URL.
 
 Configure server-side environment variables:
 

@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises'
-import { pool, checkDatabase } from '../src/backend/db/neon.ts'
+import { pool, checkDatabase } from '../src/backend/db/neon.js'
 
 try {
   await checkDatabase()

@@ -91,3 +91,23 @@ export interface UserSession {
   avatarUrl: string
   token: string
 }
+
+export interface ClerkAccount {
+  id: string
+  firstName: string | null
+  lastName: string | null
+  primaryEmailAddressId: string | null
+  emailAddresses: { id: string; emailAddress: string; verification: { status: string } | null }[]
+}
+
+export interface CurrencySummary {
+  currency: string
+  count: number
+  totalTracked: number
+  totalExcludingRejected: number
+  approved: number
+  pending: number
+  flagged: number
+  rejected: number
+  categories: Record<string, number>
+}

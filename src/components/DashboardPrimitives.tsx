@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ArrowRight, Check, FileText, LoaderCircle, Upload } from 'lucide-react'
 import type { RefObject } from 'react'
-import type { InvoiceStatus } from '../backend/types'
+import type { InvoiceStatus } from '../shared/types'
 
 export const statusLabels: Record<InvoiceStatus, string> = { 'Pending Audit': 'Needs review', Flagged: 'Check needed', Approved: 'Approved', Rejected: 'Rejected' }
 export function StatusBadge({ status }: { status: InvoiceStatus }) {

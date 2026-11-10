@@ -1,11 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { auditInvoice } from '../src/shared/audit.ts'
-import { invoiceFields } from '../src/backend/validation.ts'
-import { GeminiClient } from '../src/backend/gemini/client.ts'
-import { summarizeLedger } from '../src/shared/analytics.ts'
+import { auditInvoice } from '../src/shared/audit.js'
+import { invoiceFields } from '../src/backend/validation.js'
+import { GeminiClient } from '../src/backend/gemini/client.js'
+import { summarizeLedger } from '../src/shared/analytics.js'
 import { csvCell } from '../src/shared/export.ts'
-import type { InvoiceRecord } from '../src/backend/types.ts'
+import type { InvoiceRecord } from '../src/shared/types.ts'
 
 export const clean: InvoiceRecord = {id:'bd1dced2-3a64-45ac-a328-5ca929f9296d',invoiceNumber:'TEST-001',vendor:'Example Vendor',vendorCategory:'Logistics',issueDate:'2026-11-07',dueDate:'2026-11-30',subtotal:100,taxRate:0,taxAmount:0,total:100,currency:'USD',status:'Pending Audit',flags:[],lineItems:[{id:'line-1',description:'Transport',quantity:2,unitPrice:50,total:100}],auditHistory:[],extractedByAI:false,confidenceScore:0}
 test('clean zero-tax invoice passes without replacing valid zeroes',()=>assert.deepEqual(auditInvoice(clean,[]),[]))
