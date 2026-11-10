@@ -17,6 +17,6 @@ export function ClerkAuthProvider({ children }: { children: ReactNode }) {
     signInFallbackRedirectUrl="/account"
     signUpFallbackRedirectUrl="/account"
     afterSignOutUrl="/sign-in"
-    appearance={{ variables: { colorPrimary: '#21d2ed', colorNeutral: '#ffffff', colorBackground: '#111827', colorForeground: '#ffffff', colorMutedForeground: '#b0b0b0', colorInput: '#101726', colorInputForeground: '#ffffff', borderRadius: '0.75rem' } }}
+    appearance={{ options: { unsafe_disableDevelopmentModeWarnings: true }, elements: { footer: { display: 'none' }, userButtonPopoverFooter: { display: 'none' } }, variables: { colorPrimary: '#21d2ed', colorNeutral: '#ffffff', colorBackground: '#111827', colorForeground: '#ffffff', colorMutedForeground: '#b0b0b0', colorInput: '#101726', colorInputForeground: '#ffffff', borderRadius: '0.75rem' } }}
   >{children}</ClerkProvider>
 }
