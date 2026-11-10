@@ -71,12 +71,14 @@ test('Clerk signatures, verified account linking, isolated ledgers, and saved re
         }
         assert(instruction.includes('Server-calculated currency totals'))
         assert(instruction.includes('JS-PDF-CHECK'))
-        return 'Verified assistant response using the signed-in account ledger.'
+        return instruction.startsWith('Respond in Turkish.') ? 'Faturalarınızın Türkçe özeti.' : 'Verified assistant response using the signed-in account ledger.'
       }
       const pdf=await req(good,'/api/invoices/upload-and-audit','POST',{fileName:'verification.pdf',fileType:'application/pdf',data:Buffer.from('%PDF-isolated-test').toString('base64')})
       assert.equal(pdf.status,201,JSON.stringify(pdf.body));assert.equal(pdf.body.data.extractedByAI,true)
       const chat=await req(good,'/api/chat','POST',{message:'Summarize my invoices.'})
       assert.equal(chat.status,200,JSON.stringify(chat.body));assert.equal(chat.body.data.sender,'assistant');assert.match(chat.body.data.text,/Verified assistant response/)
+      const turkish=await req(good,'/api/chat','POST',{message:'Faturalarımı özetle.',locale:'tr'});assert.equal(turkish.status,200);assert.equal(turkish.body.data.text,'Faturalarınızın Türkçe özeti.')
+      assert.equal((await req(good,'/api/chat','POST',{message:'Summarize',locale:'invalid'})).status,400)
       assert.equal((await req(token(providerIds[1]),'/api/invoices')).body.data.length,0)
     } finally { GeminiClient.generateContent=originalGenerate }
     assert.equal((await req(null,'/api/invoices')).status,401)

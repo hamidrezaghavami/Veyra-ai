@@ -1,3 +1,4 @@
+import { useLanguage } from '../context/LanguageContext'
 import { Navbar } from '../components/Navbar'
 import { Hero } from '../components/Hero'
 import { Logos } from '../components/Logos'
@@ -14,11 +15,13 @@ import { CtaBanner } from '../components/CtaBanner'
 import { Footer } from '../components/Footer'
 
 export function HomePage() {
+  const { t } = useLanguage()
+
   return (
     <div className="min-h-screen bg-transparent text-white overflow-x-hidden selection:bg-[#21d2ed]/30 selection:text-white relative">
       {/* Living Atmospheric Background */}
 
-      <a href="#main-content" className="skip-link">Skip to content</a>
+      <a href="#main-content" className="skip-link">{t("Skip to content")}</a>
       {/* Navigation */}
       <Navbar />
 

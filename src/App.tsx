@@ -1,3 +1,4 @@
+import { useLanguage } from './context/LanguageContext'
 import { useRouter, RouterProvider } from './context/RouterContext'
 import { AtmosphericBackground } from './components/AtmosphericBackground'
 import { HomePage } from './pages/HomePage'
@@ -81,13 +82,15 @@ function RouteSwitcher() {
 }
 
 function MainContent() {
+  const { t } = useLanguage()
+
   const { path } = useRouter()
   const isDashboard = path === '/account' || path === '/dashboard'
 
   return (
     <>
       {!isDashboard && <AtmosphericBackground />}
-      <Suspense fallback={<main className="relative z-10 p-12" role="status">Loading…</main>}><RouteSwitcher /></Suspense>
+      <Suspense fallback={<main className="relative z-10 p-12" role="status">{t("Loading…")}</main>}><RouteSwitcher /></Suspense>
     </>
   )
 }

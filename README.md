@@ -51,3 +51,7 @@ Documents are limited to 2.8 MB to stay within serverless request limits. PDF an
 Contact and waitlist messages are stored in PostgreSQL. They are not emailed. Administrators can retrieve them through authenticated database tooling. Success is shown only after the database write succeeds. Request-limit buckets contain hashed identifiers; periodically prune rows older than one day from `veyra_request_limits` through an administrative maintenance job.
 
 CSV export includes currency and escapes spreadsheet formulas. Analytics keep currencies separate and exclude rejected invoices from category totals. No paid plans, unverified customer testimonials, uptime guarantees, accounting integrations, or fabricated accuracy claims are advertised.
+
+## Languages
+
+English and Turkish are available from the EN/TR switch in the navigation and dashboard. The preference is stored locally and follows the browser language on a first visit. Authored interface and article copy lives in `src/i18n/tr.json`, with English source strings as keys. Dates and currency display follow the selected locale. Invoice data, vendor names, identifiers, and user notes are preserved. The assistant accepts an optional `locale` (`en` or `tr`); omitting it keeps the English API behavior. Clerk embedded screens use the official localizations. Provider-hosted pages and browser-native dialogs use their own language settings.

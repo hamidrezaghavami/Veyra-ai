@@ -1,6 +1,9 @@
+import { useLanguage } from '../context/LanguageContext'
 import { useRouter } from '../context/RouterContext'
 
 export function Footer() {
+  const { t } = useLanguage()
+
   const { navigate } = useRouter()
 
   const handleLink = (href: string) => (e: React.MouseEvent) => {
@@ -34,82 +37,54 @@ export function Footer() {
                   <circle cx="12" cy="12" r="1.8" fill="currentColor" />
                 </svg>
               </div>
-              <span className="font-medium text-lg text-white tracking-tight">Veyra AI</span>
+              <span className="font-medium text-lg text-white tracking-tight">{t("Veyra AI")}</span>
             </div>
-            <p className="text-[14px] leading-relaxed max-w-sm text-neutral-400">
-              AI-powered invoice auditing and expense tracking. Understand your spending and stay in control.
-            </p>
+            <p className="text-[14px] leading-relaxed max-w-sm text-neutral-400">{t("AI-powered invoice auditing and expense tracking. Understand your spending and stay in control.")}</p>
           </div>
 
           {/* Navigation */}
           <div>
-            <div className="text-[12px] font-semibold uppercase tracking-wider text-white mb-4">
-              Navigation
-            </div>
+            <div className="text-[12px] font-semibold uppercase tracking-wider text-white mb-4">{t("Navigation")}</div>
             <ul className="space-y-2.5 text-[14px]">
               <li>
-                <a href="/#features" className="hover:text-white transition-colors">
-                  Features
-                </a>
+                <a href="/#features" className="hover:text-white transition-colors">{t("Features")}</a>
               </li>
               <li>
-                <a href="/#use-cases" className="hover:text-white transition-colors">
-                  Use Cases
-                </a>
+                <a href="/#use-cases" className="hover:text-white transition-colors">{t("Use Cases")}</a>
               </li>
               <li>
-                <a href="/#pricing" className="hover:text-white transition-colors">
-                  Pricing
-                </a>
+                <a href="/#pricing" className="hover:text-white transition-colors">{t("Pricing")}</a>
               </li>
               <li>
-                <a href="/#faq" className="hover:text-white transition-colors">
-                  FAQ
-                </a>
+                <a href="/#faq" className="hover:text-white transition-colors">{t("FAQ")}</a>
               </li>
               <li>
-                <a href="/blog" onClick={handleLink('/blog')} className="hover:text-white transition-colors">
-                  Blog
-                </a>
+                <a href="/blog" onClick={handleLink('/blog')} className="hover:text-white transition-colors">{t("Blog")}</a>
               </li>
               <li>
-                <a href="/changelog" onClick={handleLink('/changelog')} className="hover:text-white transition-colors">
-                  Changelog
-                </a>
+                <a href="/changelog" onClick={handleLink('/changelog')} className="hover:text-white transition-colors">{t("Changelog")}</a>
               </li>
             </ul>
           </div>
 
           {/* Information */}
           <div>
-            <div className="text-[12px] font-semibold uppercase tracking-wider text-white mb-4">
-              Information
-            </div>
+            <div className="text-[12px] font-semibold uppercase tracking-wider text-white mb-4">{t("Information")}</div>
             <ul className="space-y-2.5 text-[14px]">
               <li>
-                <a href="/contact" onClick={handleLink('/contact')} className="hover:text-white transition-colors">
-                  Contact
-                </a>
+                <a href="/contact" onClick={handleLink('/contact')} className="hover:text-white transition-colors">{t("Contact")}</a>
               </li>
               <li>
-                <a href="/waitlist" onClick={handleLink('/waitlist')} className="hover:text-white transition-colors">
-                  Waitlist
-                </a>
+                <a href="/waitlist" onClick={handleLink('/waitlist')} className="hover:text-white transition-colors">{t("Waitlist")}</a>
               </li>
               <li>
-                <a href="/legal/privacy-policy" onClick={handleLink('/legal/privacy-policy')} className="hover:text-white transition-colors">
-                  Privacy Policy
-                </a>
+                <a href="/legal/privacy-policy" onClick={handleLink('/legal/privacy-policy')} className="hover:text-white transition-colors">{t("Privacy Policy")}</a>
               </li>
               <li>
-                <a href="/legal/terms-of-service" onClick={handleLink('/legal/terms-of-service')} className="hover:text-white transition-colors">
-                  Terms of Service
-                </a>
+                <a href="/legal/terms-of-service" onClick={handleLink('/legal/terms-of-service')} className="hover:text-white transition-colors">{t("Terms of Service")}</a>
               </li>
               <li>
-                <a href="/design-system" onClick={handleLink('/design-system')} className="hover:text-white transition-colors">
-                  Design System
-                </a>
+                <a href="/design-system" onClick={handleLink('/design-system')} className="hover:text-white transition-colors">{t("Design System")}</a>
               </li>
             </ul>
           </div>
@@ -119,10 +94,9 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="pt-8 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between text-[13px] text-neutral-500 gap-4">
           <div>
-            © {new Date().getFullYear()} Veyra AI
-          </div>
+            © {new Date().getFullYear()}{t(" Veyra AI")}</div>
           <div className="flex items-center gap-6">
-            <span>All rights reserved.</span>
+            <span>{t("All rights reserved.")}</span>
           </div>
         </div>
       </div>

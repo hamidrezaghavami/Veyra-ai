@@ -1,3 +1,4 @@
+import { useLanguage } from '../context/LanguageContext'
 import { useState } from 'react'
 import { ArrowRight, CheckCircle2, AlertTriangle, FileText, Sparkles, ShieldCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -6,6 +7,8 @@ import { ShaderBackground } from './ShaderBackground'
 import { LiquidButton } from './LiquidButton'
 
 export function Hero() {
+  const { t } = useLanguage()
+
   const { navigate } = useRouter()
   const [heroApproved, setHeroApproved] = useState(false)
   const [activeTab, setActiveTab] = useState<'invoice' | 'audit'>('invoice')
@@ -23,12 +26,8 @@ export function Hero() {
           onClick={() => navigate('/changelog')}
           className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-glass-secondary border border-white/15 mb-8 cursor-pointer select-none"
         >
-          <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#21d2ed]/20 text-[#21d2ed] border border-[#21d2ed]/40">
-            NEW
-          </span>
-          <span className="text-[13px] text-neutral-300">
-            Invoice and expense auditing with AI
-          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#21d2ed]/20 text-[#21d2ed] border border-[#21d2ed]/40">{t("NEW")}</span>
+          <span className="text-[13px] text-neutral-300">{t("Invoice and expense auditing with AI")}</span>
           <ArrowRight className="size-3 text-[#21d2ed]" />
         </motion.div>
 
@@ -38,10 +37,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-4xl sm:text-6xl md:text-[66px] font-medium tracking-[-0.04em] text-white leading-[1.05] max-w-4xl mx-auto"
-        >
-          Your invoices, audited. <br className="hidden sm:block" />
-          Your expenses, clear.
-        </motion.h1>
+        >{t("Your invoices, audited. ")}<br className="hidden sm:block" />{t("Your expenses, clear.")}</motion.h1>
 
         {/* Subtitle */}
         <motion.p
@@ -49,9 +45,7 @@ export function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-6 max-w-2xl mx-auto text-lg sm:text-[19px] text-[#b0b0b0] leading-[1.4] font-normal"
-        >
-          Process invoices, track expenses, and spot financial errors with AI. Stay in control of every approval.
-        </motion.p>
+        >{t("Process invoices, track expenses, and spot financial errors with AI. Stay in control of every approval.")}</motion.p>
 
         {/* Liquid Glass Action Buttons with Framer Motion */}
         <motion.div
@@ -66,9 +60,7 @@ export function Hero() {
             onClick={() => navigate('/sign-up')}
             className="w-full sm:w-auto"
             icon={<ArrowRight className="size-4" />}
-          >
-            Try Veyra AI Free
-          </LiquidButton>
+          >{t("Try Veyra AI Free")}</LiquidButton>
 
           <LiquidButton
             variant="secondary"
@@ -78,15 +70,11 @@ export function Hero() {
               if (el) el.scrollIntoView({ behavior: 'smooth' })
             }}
             className="w-full sm:w-auto"
-          >
-            Learn more
-          </LiquidButton>
+          >{t("Learn more")}</LiquidButton>
         </motion.div>
 
         {/* Sub-hero Audience Proof */}
-        <p className="mt-5 text-[13px] text-neutral-400 font-normal">
-          Built for freelancers, small businesses, and accounting teams
-        </p>
+        <p className="mt-5 text-[13px] text-neutral-400 font-normal">{t("Built for freelancers, small businesses, and accounting teams")}</p>
 
         {/* Hero Interactive Showcase Card (Surface 1 + Liquid Refraction + Shader) */}
         <motion.div
@@ -102,21 +90,21 @@ export function Hero() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 px-3 py-1 rounded-full liquid-glass-secondary border border-white/15">
                   <FileText className="size-3.5 text-[#21d2ed]" />
-                  <span className="text-[12px] font-mono text-white">Example invoice · INV-2026-9812.pdf</span>
+                  <span className="text-[12px] font-mono text-white">{t("Example invoice · INV-2026-9812.pdf")}</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-medium backdrop-blur-md">
                   <ShieldCheck className="size-3" />
-                  <span>Illustrative preview</span>
+                  <span>{t("Illustrative preview")}</span>
                 </div>
               </div>
 
               <div className="flex items-end justify-between">
                 <div>
-                  <div className="text-[11px] uppercase tracking-wider text-neutral-400">Detected Vendor</div>
-                  <div className="text-xl font-medium text-white tracking-tight">Amazon Web Services (AWS)</div>
+                  <div className="text-[11px] uppercase tracking-wider text-neutral-400">{t("Detected Vendor")}</div>
+                  <div className="text-xl font-medium text-white tracking-tight">{t("Amazon Web Services (AWS)")}</div>
                 </div>
                 <div className="text-right">
-                  <div className="text-[11px] uppercase tracking-wider text-neutral-400">Total Amount</div>
+                  <div className="text-[11px] uppercase tracking-wider text-neutral-400">{t("Total Amount")}</div>
                   <div className="text-2xl font-mono font-medium text-white">$5,217.65</div>
                 </div>
               </div>
@@ -137,9 +125,7 @@ export function Hero() {
                       ? 'liquid-glass-secondary text-white font-medium border-white/20'
                       : 'text-[#b0b0b0] hover:text-white'
                   }`}
-                >
-                  Extracted Breakdown
-                </motion.button>
+                >{t("Extracted Breakdown")}</motion.button>
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -150,15 +136,14 @@ export function Hero() {
                       : 'text-[#b0b0b0] hover:text-white'
                   }`}
                 >
-                  <span>Validation Checks</span>
+                  <span>{t("Validation Checks")}</span>
                   <span className="size-1.5 rounded-full bg-[#21d2ed]" />
                 </motion.button>
               </div>
 
-              <div className="text-[12px] text-neutral-400">
-                Status:{' '}
+              <div className="text-[12px] text-neutral-400">{t("Status:")}{' '}
                 <span className={heroApproved ? 'text-emerald-400 font-medium' : 'text-amber-400 font-medium'}>
-                  {heroApproved ? 'Approved by Controller' : 'Ready for Review'}
+                  {heroApproved ? t('Approved by Controller') : t('Ready for Review')}
                 </span>
               </div>
             </div>
@@ -167,15 +152,15 @@ export function Hero() {
             {activeTab === 'invoice' ? (
               <div className="space-y-2 text-[13px]">
                 <div className="flex justify-between items-center py-1.5 border-b border-white/5 text-[#b0b0b0]">
-                  <span>EC2 Compute Elastic Nodes (c6i.4xlarge) x 4</span>
+                  <span>{t("EC2 Compute Elastic Nodes (c6i.4xlarge) x 4")}</span>
                   <span className="font-mono text-white">$2,880.00</span>
                 </div>
                 <div className="flex justify-between items-center py-1.5 border-b border-white/5 text-[#b0b0b0]">
-                  <span>S3 Standard Storage (52 TB Multi-AZ)</span>
+                  <span>{t("S3 Standard Storage (52 TB Multi-AZ)")}</span>
                   <span className="font-mono text-white">$1,196.00</span>
                 </div>
                 <div className="flex justify-between items-center py-1.5 border-b border-white/5 text-[#b0b0b0]">
-                  <span>Sales Tax / VAT (8.25%)</span>
+                  <span>{t("Sales Tax / VAT (8.25%)")}</span>
                   <span className="font-mono text-white">$397.65</span>
                 </div>
               </div>
@@ -183,36 +168,32 @@ export function Hero() {
               <div className="space-y-2.5 text-[12px]">
                 <div className="flex items-center gap-2.5 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
                   <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
-                  <span>Duplicate Check: Zero identical vendor invoice numbers found in past 180 days.</span>
+                  <span>{t("Duplicate Check: Zero identical vendor invoice numbers found in past 180 days.")}</span>
                 </div>
                 <div className="flex items-center gap-2.5 p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-300">
                   <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
-                  <span>Math Validation: Stated total ($5,217.65) strictly matches sum of line items + tax.</span>
+                  <span>{t("Math Validation: Stated total ($5,217.65) strictly matches sum of line items + tax.")}</span>
                 </div>
               </div>
             )}
 
             {/* Decision Controls with Liquid Motion */}
             <div className="mt-5 pt-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
-              <span className="text-[12px] text-neutral-400">
-                You make the final call on every disbursement.
-              </span>
+              <span className="text-[12px] text-neutral-400">{t("You make the final call on every disbursement.")}</span>
               <div className="flex items-center gap-2 w-full sm:w-auto">
                 <LiquidButton
                   variant="secondary"
                   size="sm"
                   onClick={() => setHeroApproved(false)}
                   className="w-1/2 sm:w-auto"
-                >
-                  Flag Issue
-                </LiquidButton>
+                >{t("Flag Issue")}</LiquidButton>
                 <LiquidButton
                   variant={heroApproved ? 'accent' : 'primary'}
                   size="sm"
                   onClick={() => setHeroApproved(true)}
                   className="w-1/2 sm:w-auto"
                 >
-                  {heroApproved ? '✓ Approved' : 'Approve Invoice'}
+                  {heroApproved ? t('✓ Approved') : t('Approve Invoice')}
                 </LiquidButton>
               </div>
             </div>
