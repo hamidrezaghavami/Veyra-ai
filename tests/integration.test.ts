@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { randomUUID, generateKeyPairSync, sign } from 'node:crypto'
 import { createBackendApp } from '../src/backend/app.js'
 import { pool } from '../src/backend/db/neon.js'
+import { db } from '../src/backend/db/store.js'
 import { GeminiClient } from '../src/backend/gemini/client.js'
 import type { ClerkAccount } from '../src/shared/types.ts'
 
@@ -56,6 +57,20 @@ test('Clerk signatures, verified account linking, isolated ledgers, and saved re
     const fields={invoiceNumber:'CLERK-VERIFICATION',vendor:'Verification Vendor',vendorCategory:'Logistics',issueDate:'2026-11-07',dueDate:'2026-11-30',subtotal:100,taxRate:0,taxAmount:0,total:999,currency:'USD',lineItems:[{description:'Transport',quantity:2,unitPrice:50,total:100}]}
     const upload=await req(good,'/api/invoices/upload-and-audit','POST',{fileName:'invoice.json',fileType:'application/json',data:Buffer.from(JSON.stringify(fields)).toString('base64')})
     assert.equal(upload.status,201,JSON.stringify(upload.body));const invoice=upload.body.data;assert.equal(invoice.status,'Flagged')
+    const rollbackId = randomUUID()
+    await assert.rejects(db.addInvoice(legacyId, {...invoice,id:rollbackId}, (record: typeof invoice) => record, {fileName:'invalid',fileType:'text/html',bytes:Buffer.from('invalid')}))
+    assert.equal((await pool.query('SELECT id FROM veyra_invoice_records WHERE id=$1',[rollbackId])).rowCount,0)
+    const documentPath = `/api/invoices/${invoice.id}/document`
+    const original = await fetch(base+documentPath,{headers:{authorization:`Bearer ${good}`}})
+    assert.equal(original.status,200)
+    assert.equal(original.headers.get('content-type'),'application/json')
+    assert.deepEqual(await original.json(),fields)
+    assert.equal((await req(null,documentPath)).status,401)
+    assert.equal((await req(token(providerIds[1]),documentPath)).status,404)
+    assert.equal((await req(good,'/api/invoices/not-a-uuid/document')).status,400)
+    const tooLarge = await req(good,'/api/invoices/upload-and-audit','POST',{fileName:'large.json',fileType:'application/json',data:Buffer.alloc(2_800_001,32).toString('base64')})
+    assert.equal(tooLarge.status,400)
+    assert.equal((await req(good,'/api/invoices')).body.data.length,1)
     assert.equal((await req(token(providerIds[1]),'/api/invoices')).body.data.length,0)
     assert.equal((await req(token(providerIds[1]),`/api/invoices/${invoice.id}/approve`,'PATCH',{note:'Attempted cross-account review'})).status,404)
     assert.equal((await req(good,`/api/invoices/${invoice.id}/approve`,'PATCH',{note:''})).status,400)
