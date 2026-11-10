@@ -1,9 +1,12 @@
+import { useLanguage } from '../context/LanguageContext'
 import { ArrowRight } from 'lucide-react'
 import { useRouter } from '../context/RouterContext'
 import { ShaderBackground } from './ShaderBackground'
 import { LiquidButton } from './LiquidButton'
 
 export function CtaBanner() {
+  const { t } = useLanguage()
+
   const { navigate } = useRouter()
 
   return (
@@ -19,17 +22,12 @@ export function CtaBanner() {
 
           <div className="max-w-2xl mx-auto relative z-10">
             <div className="eyebrow-tag mb-4 justify-center">
-              <span>Get started</span>
+              <span>{t("Get started")}</span>
             </div>
 
-            <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05] mb-5">
-              Less invoice admin. <br />
-              More financial control.
-            </h2>
+            <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05] mb-5">{t("Less invoice admin. ")}<br />{t("More financial control.")}</h2>
 
-            <p className="text-base sm:text-lg text-[#b0b0b0] leading-[1.5] mb-9 font-normal">
-              Process documents, review flagged issues, and understand your expenses with Veyra AI. You stay in charge.
-            </p>
+            <p className="text-base sm:text-lg text-[#b0b0b0] leading-[1.5] mb-9 font-normal">{t("Process documents, review flagged issues, and understand your expenses with Veyra AI. You stay in charge.")}</p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5">
               <LiquidButton
@@ -38,18 +36,14 @@ export function CtaBanner() {
                 onClick={() => navigate('/sign-up')}
                 className="w-full sm:w-auto"
                 icon={<ArrowRight className="size-4" />}
-              >
-                Try Veyra AI Free
-              </LiquidButton>
+              >{t("Try Veyra AI Free")}</LiquidButton>
 
               <LiquidButton
                 variant="secondary"
                 size="lg"
                 onClick={() => navigate('/waitlist')}
                 className="w-full sm:w-auto"
-              >
-                Join the Waitlist
-              </LiquidButton>
+              >{t("Join the Waitlist")}</LiquidButton>
             </div>
           </div>
         </div>

@@ -6,8 +6,6 @@ export function AtmosphericBackground() {
   const pointerX = useMotionValue(0)
   const pointerY = useMotionValue(0)
   const visibility = useMotionValue(0)
-  const x = useSpring(pointerX, { stiffness: 60, damping: 30 })
-  const y = useSpring(pointerY, { stiffness: 60, damping: 30 })
   const opacity = useSpring(visibility, { stiffness: 80, damping: 25 })
 
   useEffect(() => {
@@ -37,7 +35,7 @@ export function AtmosphericBackground() {
 
   return <div className="site-atmosphere" aria-hidden="true">
     <div className="site-atmosphere-wash" />
-    {!reducedMotion && <motion.div className="site-cursor-glow" style={{ x, y, opacity }} />}
+    {!reducedMotion && <motion.div className="site-cursor-glow" style={{ x: pointerX, y: pointerY, opacity }} />}
     <div className="site-atmosphere-texture" />
     <div className="site-atmosphere-horizon" />
   </div>

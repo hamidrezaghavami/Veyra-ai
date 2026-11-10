@@ -1,3 +1,4 @@
+import { useLanguage } from '../context/LanguageContext'
 import { useState } from 'react'
 import {
   FileText,
@@ -15,6 +16,8 @@ import { LiquidButton } from './LiquidButton'
 import { useRouter } from '../context/RouterContext'
 
 export function UseCases() {
+  const { t } = useLanguage()
+
   const { navigate } = useRouter()
   const [activeTab, setActiveTab] = useState<number>(0)
 
@@ -67,12 +70,9 @@ export function UseCases() {
           className="max-w-3xl mb-12"
         >
           <div className="eyebrow-tag mb-3">
-            <span>Use cases</span>
+            <span>{t("Use cases")}</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05]">
-            One platform. <br />
-            Every financial step.
-          </h2>
+          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05]">{t("One platform. ")}<br />{t("Every financial step.")}</h2>
         </motion.div>
 
         {/* Tab Buttons (Liquid Glass Container) */}
@@ -89,7 +89,7 @@ export function UseCases() {
                   : 'text-[#b0b0b0] hover:text-white hover:bg-white/5'
               }`}
             >
-              {tab.label}
+              {t(tab.label)}
             </motion.button>
           ))}
         </div>
@@ -113,13 +113,13 @@ export function UseCases() {
                 transition={{ duration: 0.35, ease: 'easeOut' }}
               >
                 <div className="text-[12px] uppercase tracking-wider text-[#21d2ed] font-medium mb-3">
-                  0{activeTab + 1} · {current.label}
+                  0{activeTab + 1} · {t(current.label)}
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-medium text-white tracking-[-0.03em] leading-tight mb-4">
-                  {current.title}
+                  {t(current.title)}
                 </h3>
                 <p className="text-[15px] text-[#b0b0b0] leading-[1.5] mb-8">
-                  {current.description}
+                  {t(current.description)}
                 </p>
               </motion.div>
             </AnimatePresence>
@@ -130,9 +130,7 @@ export function UseCases() {
                 size="md"
                 onClick={() => navigate('/account')}
                 icon={<ArrowRight className="size-4" />}
-              >
-                Try this workflow
-              </LiquidButton>
+              >{t("Try this workflow")}</LiquidButton>
             </div>
           </div>
 
@@ -152,24 +150,24 @@ export function UseCases() {
                   {activeTab === 0 && (
                     <div className="space-y-3 bg-[#080a0f]/90 backdrop-blur-md p-4 rounded-xl border border-white/10">
                       <div className="flex items-center justify-between pb-2 border-b border-white/5 text-[12px]">
-                        <span className="text-[#b0b0b0]">Uploaded Document</span>
-                        <span className="text-emerald-400 font-mono">100% Extracted</span>
+                        <span className="text-[#b0b0b0]">{t("Uploaded Document")}</span>
+                        <span className="text-emerald-400 font-mono">{t("100% Extracted")}</span>
                       </div>
                       <div className="grid grid-cols-2 gap-3 text-[12px]">
                         <div className="p-2.5 rounded-lg bg-white/5">
-                          <span className="text-[#b0b0b0] block text-[10px] uppercase">Vendor</span>
-                          <span className="text-white font-medium">Datadog APM</span>
+                          <span className="text-[#b0b0b0] block text-[10px] uppercase">{t("Vendor")}</span>
+                          <span className="text-white font-medium">{t("Datadog APM")}</span>
                         </div>
                         <div className="p-2.5 rounded-lg bg-white/5">
-                          <span className="text-[#b0b0b0] block text-[10px] uppercase">Invoice #</span>
-                          <span className="text-white font-medium font-mono">SUB-8921-OCT</span>
+                          <span className="text-[#b0b0b0] block text-[10px] uppercase">{t("Invoice #")}</span>
+                          <span className="text-white font-medium font-mono">{t("SUB-8921-OCT")}</span>
                         </div>
                         <div className="p-2.5 rounded-lg bg-white/5">
-                          <span className="text-[#b0b0b0] block text-[10px] uppercase">Subtotal</span>
+                          <span className="text-[#b0b0b0] block text-[10px] uppercase">{t("Subtotal")}</span>
                           <span className="text-white font-medium font-mono">$2,840.00</span>
                         </div>
                         <div className="p-2.5 rounded-lg bg-white/5">
-                          <span className="text-[#b0b0b0] block text-[10px] uppercase">Total Due</span>
+                          <span className="text-[#b0b0b0] block text-[10px] uppercase">{t("Total Due")}</span>
                           <span className="text-white font-medium font-mono">$3,074.30</span>
                         </div>
                       </div>
@@ -179,21 +177,19 @@ export function UseCases() {
                   {activeTab === 1 && (
                     <div className="space-y-3 bg-[#080a0f]/90 backdrop-blur-md p-4 rounded-xl border border-white/10">
                       <div className="flex items-center justify-between pb-2 border-b border-white/5 text-[12px]">
-                        <span className="text-white font-medium">Audit Rule Engine</span>
-                        <span className="text-rose-400 font-mono">1 Anomaly Caught</span>
+                        <span className="text-white font-medium">{t("Audit Rule Engine")}</span>
+                        <span className="text-rose-400 font-mono">{t("1 Anomaly Caught")}</span>
                       </div>
                       <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/25 flex items-start gap-2.5 text-[12px] text-rose-300">
                         <AlertTriangle className="size-4 shrink-0 text-rose-400 mt-0.5" />
                         <div>
-                          <div className="font-medium text-rose-200">Duplicate Submission Detected</div>
-                          <div className="text-[11px] text-rose-300/80">
-                            Invoice #4828 from Northwind Freight ($6,280.00) matches an invoice paid on Oct 28.
-                          </div>
+                          <div className="font-medium text-rose-200">{t("Duplicate Submission Detected")}</div>
+                          <div className="text-[11px] text-rose-300/80">{t("Invoice #4828 from Northwind Freight ($6,280.00) matches an invoice paid on Oct 28.")}</div>
                         </div>
                       </div>
                       <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2 text-[12px] text-emerald-300">
                         <CheckCircle2 className="size-4 text-emerald-400" />
-                        <span>Vendor tax ID & payment wiring instructions verified</span>
+                        <span>{t("Vendor tax ID & payment wiring instructions verified")}</span>
                       </div>
                     </div>
                   )}
@@ -201,26 +197,26 @@ export function UseCases() {
                   {activeTab === 2 && (
                     <div className="space-y-3 bg-[#080a0f]/90 backdrop-blur-md p-4 rounded-xl border border-white/10">
                       <div className="flex items-center justify-between pb-2 border-b border-white/5 text-[12px]">
-                        <span className="text-white font-medium">Expense Analytics · Q4 2026</span>
-                        <span className="text-[#21d2ed] font-mono">$42,910 Total Audited</span>
+                        <span className="text-white font-medium">{t("Expense Analytics · Q4 2026")}</span>
+                        <span className="text-[#21d2ed] font-mono">{t("$42,910 Total Audited")}</span>
                       </div>
                       <div className="grid grid-cols-3 gap-2 text-[11px] text-center">
                         <div className="p-2.5 rounded-lg bg-white/5">
-                          <div className="text-neutral-400">Cloud & Infra</div>
+                          <div className="text-neutral-400">{t("Cloud & Infra")}</div>
                           <div className="text-white font-mono font-medium text-[13px]">$18,420</div>
                         </div>
                         <div className="p-2.5 rounded-lg bg-white/5">
-                          <div className="text-neutral-400">Software / SaaS</div>
+                          <div className="text-neutral-400">{t("Software / SaaS")}</div>
                           <div className="text-white font-mono font-medium text-[13px]">$14,290</div>
                         </div>
                         <div className="p-2.5 rounded-lg bg-white/5">
-                          <div className="text-neutral-400">Logistics</div>
+                          <div className="text-neutral-400">{t("Logistics")}</div>
                           <div className="text-white font-mono font-medium text-[13px]">$10,200</div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 text-[11px] text-neutral-400 pt-1">
                         <TrendingUp className="size-3.5 text-emerald-400" />
-                        <span>Zero duplicate disbursements recorded this fiscal month.</span>
+                        <span>{t("Zero duplicate disbursements recorded this fiscal month.")}</span>
                       </div>
                     </div>
                   )}
@@ -229,15 +225,11 @@ export function UseCases() {
                     <div className="space-y-3 bg-[#080a0f]/90 backdrop-blur-md p-4 rounded-xl border border-white/10">
                       <div className="flex items-center gap-2 text-[12px] text-[#21d2ed]">
                         <MessageSquare className="size-3.5" />
-                        <span className="font-medium">AI Financial Assistant</span>
+                        <span className="font-medium">{t("AI Financial Assistant")}</span>
                       </div>
-                      <div className="p-2.5 rounded-lg bg-white/5 text-[12px] text-white">
-                        "Which invoices have errors or need review this week?"
-                      </div>
+                      <div className="p-2.5 rounded-lg bg-white/5 text-[12px] text-white">{t("\"Which invoices have errors or need review this week?\"")}</div>
                       <div className="p-3 rounded-lg bg-[#141824] border border-white/5 text-[12px] text-[#b0b0b0] leading-relaxed">
-                        <span className="text-white font-medium block mb-1">Veyra Assistant:</span>
-                        Found 2 flagged invoices: Northwind Freight #4828 ($6,280 duplicate alert) and Apex Depot #10943 ($64 tax calculation mismatch).
-                      </div>
+                        <span className="text-white font-medium block mb-1">{t("Veyra Assistant:")}</span>{t("Found 2 flagged invoices: Northwind Freight #4828 ($6,280 duplicate alert) and Apex Depot #10943 ($64 tax calculation mismatch).")}</div>
                     </div>
                   )}
                 </motion.div>

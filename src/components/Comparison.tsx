@@ -1,7 +1,10 @@
+import { useLanguage } from '../context/LanguageContext'
 import { X, Check } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 export function Comparison() {
+  const { t } = useLanguage()
+
   const manual = [
     'Documents scattered across folders',
     'Invoice details entered by hand',
@@ -32,12 +35,9 @@ export function Comparison() {
           className="max-w-3xl mb-16"
         >
           <div className="eyebrow-tag mb-3">
-            <span>Why Veyra AI</span>
+            <span>{t("Why Veyra AI")}</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05]">
-            Less manual checking. <br />
-            More informed decisions.
-          </h2>
+          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05]">{t("Less manual checking. ")}<br />{t("More informed decisions.")}</h2>
         </motion.div>
 
         {/* Comparison Grid with Slide-in Motions */}
@@ -51,7 +51,7 @@ export function Comparison() {
             className="surface-card p-6 sm:p-8 bg-[#11141e]/50 border-white/5"
           >
             <div className="flex items-center gap-2 mb-6">
-              <span className="text-sm font-medium text-neutral-400">Manual processes</span>
+              <span className="text-sm font-medium text-neutral-400">{t("Manual processes")}</span>
             </div>
             <ul className="space-y-4">
               {manual.map((item) => (
@@ -59,7 +59,7 @@ export function Comparison() {
                   <div className="size-5 rounded-full bg-rose-500/10 border border-rose-500/20 flex items-center justify-center shrink-0 mt-0.5 text-rose-400">
                     <X className="size-3" />
                   </div>
-                  <span>{item}</span>
+                  <span>{t(item)}</span>
                 </li>
               ))}
             </ul>
@@ -75,9 +75,7 @@ export function Comparison() {
           >
             <div className="flex items-center gap-2 mb-6">
               <span className="text-sm font-medium text-white flex items-center gap-2">
-                <span className="size-2 rounded-full bg-[#21d2ed]" />
-                With Veyra AI
-              </span>
+                <span className="size-2 rounded-full bg-[#21d2ed]" />{t("With Veyra AI")}</span>
             </div>
             <ul className="space-y-4">
               {veyra.map((item) => (
@@ -85,7 +83,7 @@ export function Comparison() {
                   <div className="size-5 rounded-full bg-[#21d2ed]/20 border border-[#21d2ed]/40 flex items-center justify-center shrink-0 mt-0.5 text-[#21d2ed]">
                     <Check className="size-3" />
                   </div>
-                  <span>{item}</span>
+                  <span>{t(item)}</span>
                 </li>
               ))}
             </ul>

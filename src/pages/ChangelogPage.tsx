@@ -1,3 +1,4 @@
+import { useLanguage } from '../context/LanguageContext'
 import { Check, Sparkles, Tag, Calendar } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Navbar } from '../components/Navbar'
@@ -6,6 +7,8 @@ import { CtaBanner } from '../components/CtaBanner'
 import { CHANGELOG_ITEMS } from '../data/changelogData'
 
 export function ChangelogPage() {
+  const { t } = useLanguage()
+
   return (
     <div className="min-h-screen bg-transparent text-white flex flex-col justify-between relative overflow-hidden">
       <Navbar />
@@ -14,14 +17,10 @@ export function ChangelogPage() {
         {/* Header */}
         <div className="max-w-3xl mb-16">
           <div className="eyebrow-tag mb-3">
-            <span>Changelog</span>
+            <span>{t("Changelog")}</span>
           </div>
-          <h1 className="text-4xl sm:text-6xl font-medium tracking-[-0.04em] text-white leading-[1.05] mb-4">
-            What's new
-          </h1>
-          <p className="text-lg text-[#b0b0b0]">
-            Product updates for Veyra AI’s invoice and expense workflows.
-          </p>
+          <h1 className="text-4xl sm:text-6xl font-medium tracking-[-0.04em] text-white leading-[1.05] mb-4">{t("What's new")}</h1>
+          <p className="text-lg text-[#b0b0b0]">{t("Product updates for Veyra AI’s invoice and expense workflows.")}</p>
         </div>
 
         {/* Timeline Entries */}
@@ -40,29 +39,29 @@ export function ChangelogPage() {
                   <span className="text-[12px] font-mono font-semibold px-2.5 py-0.5 rounded-full liquid-glass-secondary text-[#21d2ed] border border-[#21d2ed]/40">
                     {item.version}
                   </span>
-                  <span className="text-[13px] text-neutral-400">{item.date}</span>
+                  <span className="text-[13px] text-neutral-400">{t(item.date)}</span>
                 </div>
 
                 <h2 className="text-2xl font-medium text-white tracking-[-0.02em] mb-3">
-                  {item.title}
+                  {t(item.title)}
                 </h2>
 
                 <p className="text-[15px] text-[#b0b0b0] leading-relaxed mb-6">
-                  {item.description}
+                  {t(item.description)}
                 </p>
 
                 <div className="space-y-2.5 pt-4 border-t border-white/5">
                   {item.highlights.map((h, i) => (
                     <div key={i} className="flex items-start gap-2.5 text-[13px] text-neutral-300">
                       <span className="size-1.5 rounded-full bg-[#21d2ed] shrink-0 mt-2" />
-                      <span>{h}</span>
+                      <span>{t(h)}</span>
                     </div>
                   ))}
                 </div>
 
                 {item.quote && (
                   <div className="mt-6 p-4 rounded-xl bg-white/[0.03] border border-white/5 text-[13px] text-[#b0b0b0] italic">
-                    "{item.quote.text}"
+                    "{t(item.quote.text)}"
                     <span className="block mt-1 font-normal not-italic text-white text-[12px]">
                       — {item.quote.author}
                     </span>

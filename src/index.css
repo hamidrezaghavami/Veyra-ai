@@ -196,3 +196,12 @@ label { font-size: .875rem; color: #c9ced8; }
 .site-atmosphere-texture { position:absolute; inset:0; opacity:.14; background-image:radial-gradient(circle,rgba(176,194,211,.12) .5px,transparent .8px); background-size:36px 36px; }
 .site-atmosphere-horizon { position:absolute; inset:0 0 auto; height:1px; background:linear-gradient(90deg,transparent,rgba(139,228,231,.12),transparent); }
 @media (hover:none),(pointer:coarse),(prefers-reduced-motion:reduce) { .site-cursor-glow { display:none; } }
+.language-switch { display:inline-flex; align-items:center; gap:2px; padding:3px; border:1px solid #39414e; border-radius:7px; flex-shrink:0; background:#101620; }
+.language-switch button { border:0; background:transparent; border-radius:4px; padding:5px 6px; color:#a9b4c5; font-size:10px; line-height:1.4; font-weight:600; cursor:pointer; min-height:25px; touch-action:manipulation; }
+.language-switch button[aria-pressed="true"] { background:#263b43; color:#c5f6f7; }.language-switch button:hover { color:white; }.language-switch button:focus-visible { outline:2px solid #8be4e7; outline-offset:3px; }
+.ws-sidebar-footer>.language-switch { margin-top:16px; }.ws-sidebar-footer .ws-signout { margin-top:12px; }
+@media(max-width:760px) { .ws-sidebar-footer>.language-switch,.ws-sidebar-footer .ws-signout { margin-top:0; }.ws-sidebar-footer { gap:7px; }.ws-nav>button { font-size:11px; } }
+
+.site-cursor-glow { will-change:transform; }
+
+@media(max-width:380px) { .ws-nav>button { min-width:0; font-size:10px; gap:6px; padding-inline:6px; }.ws-nav>button svg { width:16px; height:16px; } }

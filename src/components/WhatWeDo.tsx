@@ -1,8 +1,11 @@
+import { useLanguage } from '../context/LanguageContext'
 import { FileSearch, ShieldAlert, LineChart } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { ShaderBackground } from './ShaderBackground'
 
 export function WhatWeDo() {
+  const { t } = useLanguage()
+
   const cards = [
     {
       title: 'Extract invoice details',
@@ -48,12 +51,9 @@ export function WhatWeDo() {
           className="max-w-3xl mb-16"
         >
           <div className="eyebrow-tag mb-3">
-            <span>What Veyra AI does</span>
+            <span>{t("What Veyra AI does")}</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05]">
-            Less invoice admin. <br />
-            More financial clarity.
-          </h2>
+          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05]">{t("Less invoice admin. ")}<br />{t("More financial clarity.")}</h2>
         </motion.div>
 
         {/* 3-Column Shader Cards Grid with Staggered Slide In */}
@@ -77,12 +77,12 @@ export function WhatWeDo() {
                       <card.icon className="size-4" />
                     </div>
                     <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-black/40 text-neutral-300 border border-white/5">
-                      {card.preview.badge}
+                      {t(card.preview.badge)}
                     </span>
                   </div>
 
                   <div className="p-2.5 rounded-lg bg-[#080a0f]/80 backdrop-blur-md border border-white/10 text-[11px] text-[#b0b0b0]">
-                    {card.preview.meta}
+                    {t(card.preview.meta)}
                   </div>
                 </div>
               </div>
@@ -90,10 +90,10 @@ export function WhatWeDo() {
               {/* Text Description */}
               <div className="p-4 pt-1">
                 <h3 className="text-xl font-medium text-white tracking-[-0.02em] mb-2 group-hover:text-[#21d2ed] transition-colors">
-                  {card.title}
+                  {t(card.title)}
                 </h3>
                 <p className="text-[14px] text-[#b0b0b0] leading-[1.45]">
-                  {card.desc}
+                  {t(card.desc)}
                 </p>
               </div>
             </motion.div>

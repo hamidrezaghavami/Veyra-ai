@@ -1,3 +1,4 @@
+import { useLanguage } from '../context/LanguageContext'
 import { CheckCircle2, ArrowRight } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
 import { Footer } from '../components/Footer'
@@ -5,6 +6,8 @@ import { LiquidButton } from '../components/LiquidButton'
 import { useRouter } from '../context/RouterContext'
 
 export function ThanksPage() {
+  const { t } = useLanguage()
+
   const { navigate } = useRouter()
 
   return (
@@ -17,30 +20,22 @@ export function ThanksPage() {
             <CheckCircle2 className="size-8" />
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-medium tracking-tight text-white mb-3">
-            Thank you!
-          </h1>
+          <h1 className="text-3xl sm:text-4xl font-medium tracking-tight text-white mb-3">{t("Thank you!")}</h1>
 
-          <p className="text-[15px] text-[#b0b0b0] leading-relaxed mb-8">
-            Your submission has been received. Our team will review your details and get back to you shortly.
-          </p>
+          <p className="text-[15px] text-[#b0b0b0] leading-relaxed mb-8">{t("Your submission has been received. Our team will review your details and get back to you shortly.")}</p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <LiquidButton
               variant="primary"
               size="md"
               onClick={() => navigate('/')}
-            >
-              Return to Home
-            </LiquidButton>
+            >{t("Return to Home")}</LiquidButton>
             <LiquidButton
               variant="secondary"
               size="md"
               onClick={() => navigate('/account')}
               icon={<ArrowRight className="size-4" />}
-            >
-              Explore Console
-            </LiquidButton>
+            >{t("Explore Console")}</LiquidButton>
           </div>
         </div>
       </main>

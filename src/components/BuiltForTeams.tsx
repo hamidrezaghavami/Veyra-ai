@@ -1,3 +1,4 @@
+import { useLanguage } from '../context/LanguageContext'
 import {
   FileText,
   AlertOctagon,
@@ -9,6 +10,8 @@ import {
 import { motion } from 'framer-motion'
 
 export function BuiltForTeams() {
+  const { t } = useLanguage()
+
   const features = [
     {
       title: 'Reduce manual entry',
@@ -54,12 +57,9 @@ export function BuiltForTeams() {
           className="max-w-3xl mb-16"
         >
           <div className="eyebrow-tag mb-3">
-            <span>Built for teams</span>
+            <span>{t("Built for teams")}</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05]">
-            Everything you need to <br />
-            review your finances.
-          </h2>
+          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05]">{t("Everything you need to ")}<br />{t("review your finances.")}</h2>
         </motion.div>
 
         {/* 6 Feature Grid with Staggered Slide In */}
@@ -79,10 +79,10 @@ export function BuiltForTeams() {
                   <item.icon className="size-5" />
                 </div>
                 <h3 className="text-lg font-medium text-white tracking-[-0.02em] mb-2.5">
-                  {item.title}
+                  {t(item.title)}
                 </h3>
                 <p className="text-[14px] text-[#b0b0b0] leading-[1.5]">
-                  {item.desc}
+                  {t(item.desc)}
                 </p>
               </div>
             </motion.div>

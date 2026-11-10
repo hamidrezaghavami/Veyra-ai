@@ -1,7 +1,10 @@
+import { useLanguage } from '../context/LanguageContext'
 import { useState } from 'react'
 import { Plus, Minus } from 'lucide-react'
 
 export function Faq() {
+  const { t } = useLanguage()
+
   const [openIdx, setOpenIdx] = useState<number | null>(0)
 
   const faqs = [
@@ -41,12 +44,9 @@ export function Faq() {
         {/* Section Header */}
         <div className="max-w-3xl mb-14">
           <div className="eyebrow-tag mb-3">
-            <span>FAQ</span>
+            <span>{t("FAQ")}</span>
           </div>
-          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05]">
-            Your questions. <br />
-            Clear answers.
-          </h2>
+          <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05]">{t("Your questions. ")}<br />{t("Clear answers.")}</h2>
         </div>
 
         {/* Accordions */}
@@ -60,7 +60,7 @@ export function Faq() {
                   className="w-full flex items-center justify-between text-left group cursor-pointer"
                 >
                   <span className="text-[17px] font-medium text-white group-hover:text-[#21d2ed] transition-colors pr-4">
-                    {item.q}
+                    {t(item.q)}
                   </span>
                   <div className="size-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0 text-[#b0b0b0] group-hover:text-white transition-colors">
                     {isOpen ? <Minus className="size-4" /> : <Plus className="size-4" />}
@@ -68,7 +68,7 @@ export function Faq() {
                 </button>
                 {isOpen && (
                   <div className="mt-3.5 pr-10 text-[15px] text-[#b0b0b0] leading-[1.5] animate-in fade-in duration-200">
-                    {item.a}
+                    {t(item.a)}
                   </div>
                 )}
               </div>

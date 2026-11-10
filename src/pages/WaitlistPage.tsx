@@ -1,3 +1,4 @@
+import { useLanguage } from '../context/LanguageContext'
 import { useState } from 'react'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
 import { Navbar } from '../components/Navbar'
@@ -8,6 +9,8 @@ import { waitlistService } from '../services/waitlistService'
 import { useRouter } from '../context/RouterContext'
 
 export function WaitlistPage() {
+  const { t } = useLanguage()
+
   const { navigate } = useRouter()
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -34,17 +37,12 @@ export function WaitlistPage() {
         <div className="max-w-xl w-full mx-auto text-center">
           {/* Eyebrow */}
           <div className="eyebrow-tag mb-4 justify-center">
-            <span>Early access</span>
+            <span>{t("Early access")}</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05] mb-5">
-            Bring clarity to your <br />
-            invoice workflow.
-          </h1>
+          <h1 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05] mb-5">{t("Bring clarity to your ")}<br />{t("invoice workflow.")}</h1>
 
-          <p className="text-[16px] text-[#b0b0b0] leading-[1.5] max-w-md mx-auto mb-8 font-normal">
-            Join the Veyra AI waitlist for updates on AI-powered invoice auditing and expense management.
-          </p>
+          <p className="text-[16px] text-[#b0b0b0] leading-[1.5] max-w-md mx-auto mb-8 font-normal">{t("Join the Veyra AI waitlist for updates on AI-powered invoice auditing and expense management.")}</p>
 
           {/* Form or Confirmation Card */}
           <div className="surface-card p-6 sm:p-8 relative overflow-hidden border border-white/15 text-left shadow-2xl">
@@ -52,16 +50,14 @@ export function WaitlistPage() {
 
             {!submitted ? (
               <form onSubmit={handleSubmit} className="space-y-4" aria-busy={pending}>
-                {error && <p role="alert" className="text-rose-300">{error}</p>}
+                {error && <p role="alert" className="text-rose-300">{t(error)}</p>}
                 <div>
-                  <label htmlFor="work-email" className="block text-[13px] text-[#b0b0b0] mb-2 font-medium">
-                    Work email*
-                  </label>
+                  <label htmlFor="work-email" className="block text-[13px] text-[#b0b0b0] mb-2 font-medium">{t("Work email*")}</label>
                   <input
                     id="work-email" name="email" autoComplete="email" spellCheck={false} maxLength={254}
                     type="email"
                     required
-                    placeholder="name@company.com"
+                    placeholder={t("name@company.com")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-4 py-3 text-[14px] text-white placeholder-neutral-500 focus:outline-none focus:border-[#21d2ed]"
@@ -75,14 +71,13 @@ export function WaitlistPage() {
                   className="w-full"
                   icon={<ArrowRight className="size-4" />}
                 >
-                  {pending ? 'Joining…' : 'Join the Waitlist'}
+                  {pending ? t('Joining…') : t('Join the Waitlist')}
                 </LiquidButton>
 
-                <p className="text-[12px] text-neutral-400 text-center pt-2">
-                  By joining, you agree to our{' '}
-                  <a href="/legal/terms-of-service" onClick={(e) => { e.preventDefault(); navigate('/legal/terms-of-service') }} className="text-[#b0b0b0] underline hover:text-white">Terms</a>
-                  {' '}and{' '}
-                  <a href="/legal/privacy-policy" onClick={(e) => { e.preventDefault(); navigate('/legal/privacy-policy') }} className="text-[#b0b0b0] underline hover:text-white">Privacy Policy</a>.
+                <p className="text-[12px] text-neutral-400 text-center pt-2">{t("By joining, you agree to our")}{' '}
+                  <a href="/legal/terms-of-service" onClick={(e) => { e.preventDefault(); navigate('/legal/terms-of-service') }} className="text-[#b0b0b0] underline hover:text-white">{t("Terms")}</a>
+                  {' '}{t("and")}{' '}
+                  <a href="/legal/privacy-policy" onClick={(e) => { e.preventDefault(); navigate('/legal/privacy-policy') }} className="text-[#b0b0b0] underline hover:text-white">{t("Privacy Policy")}</a>.
                 </p>
               </form>
             ) : (
@@ -90,20 +85,15 @@ export function WaitlistPage() {
                 <div className="size-12 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center mx-auto mb-2">
                   <CheckCircle2 className="size-6" />
                 </div>
-                <h3 className="text-xl font-medium text-white">
-                  You’re on the waitlist!
-                </h3>
-                <p className="text-[14px] text-[#b0b0b0]">
-                  Your registration number is <span className="text-[#21d2ed] font-mono font-medium">#{position}</span>. Updates will be associated with <span className="text-white">{email}</span>.
+                <h3 className="text-xl font-medium text-white">{t("You’re on the waitlist!")}</h3>
+                <p className="text-[14px] text-[#b0b0b0]">{t("Your registration number is ")}<span className="text-[#21d2ed] font-mono font-medium">#{position}</span>{t(". Updates will be associated with ")}<span className="text-white">{email}</span>.
                 </p>
                 <div className="pt-3">
                   <LiquidButton
                     variant="secondary"
                     size="md"
                     onClick={() => navigate('/account')}
-                  >
-                    Open Your Account →
-                  </LiquidButton>
+                  >{t("Open Your Account →")}</LiquidButton>
                 </div>
               </div>
             )}
