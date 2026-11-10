@@ -225,3 +225,7 @@ label { font-size: .875rem; color: #c9ced8; }
 .ws-local-file input { max-width:100%; }
 .ws-extracted { min-width:0; }
 @media(max-width:760px) { .ws-comparison { grid-template-columns:1fr; gap:20px; } .ws-original iframe { height:45vh; } .ws-guide ol { flex-direction:column; gap:12px; } .ws-queue-heading { align-items:flex-start; flex-direction:column; } }
+.ws-pdf-preview { overflow:auto; max-height:70vh; }
+.ws-pdf-preview canvas { max-width:100%; background:white; }
+.ws-pdf-controls { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12px; }
+.ws-pdf-controls button:disabled { opacity:.4; cursor:default; }

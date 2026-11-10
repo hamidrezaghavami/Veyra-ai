@@ -1,6 +1,8 @@
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { useLanguage } from '../context/LanguageContext'
 import { invoiceService } from '../services/invoiceService'
+
+const PdfPreview = lazy(() => import('./PdfPreview'))
 
 export function OriginalDocument({ id, fileName }: { id: string; fileName?: string }) {
   const { t } = useLanguage()
@@ -31,7 +33,7 @@ export function OriginalDocument({ id, fileName }: { id: string; fileName?: stri
     {loading ? <p role="status">{t('Loading original…')}</p> : <>
       {error && <p role="alert">{t(error)}</p>}
       {!source && <><p>{t('This older invoice has no saved original. Choose a local copy to compare; it stays on your device.')}</p><label className="ws-local-file">{t('Preview local copy')}<input type="file" accept="application/pdf,image/png,image/jpeg,image/webp,application/json" onChange={event => { const file = event.target.files?.[0]; if (!file) return; if (file.size > 2_800_000 || !['application/pdf','image/png','image/jpeg','image/webp','application/json'].includes(file.type)) { setError('Choose a PDF, PNG, JPEG, WebP, or invoice JSON file.'); return } setError(''); setSource(file) }} /></label></>}
-      {source && url && (source.type === 'application/json' ? <pre>{text}</pre> : source.type.startsWith('image/') ? <img src={url} alt={t('Original invoice')} /> : source.type === 'application/pdf' ? <><iframe src={url} title={t('Original invoice')} /><p className="ws-section-note">{t('If the PDF preview is unavailable, download the original to open it.')}</p></> : <p>{t('Preview unavailable. Download the original to open it.')}</p>)}
+      {source && url && (source.type === 'application/json' ? <pre>{text}</pre> : source.type.startsWith('image/') ? <img src={url} alt={t('Original invoice')} /> : source.type === 'application/pdf' ? <Suspense fallback={<p role="status">{t('Loading original…')}</p>}><PdfPreview source={source} /></Suspense> : <p>{t('Preview unavailable. Download the original to open it.')}</p>)}
     </>}
   </section>
 }
