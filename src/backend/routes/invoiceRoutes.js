@@ -1,3 +1,4 @@
+import { db } from '../db/store.js'
 import { Router } from 'express'
 import { z } from 'zod'
 import { InvoiceService } from '../services/invoiceService.js'
@@ -6,6 +7,14 @@ export const invoiceRouter = Router()
 invoiceRouter.get('/', async (_req, res) => {
   const data = await InvoiceService.getAll(res.locals.user.id)
   res.json({ success: true, data })
+})
+invoiceRouter.get('/:id/document', async (req, res) => {
+  const source = await db.getInvoiceDocument(res.locals.user.id, z.uuid().parse(req.params.id))
+  if (!source) return res.status(404).json({ success: false, error: 'Original document unavailable.' })
+  res.setHeader('Content-Type', source.file_type)
+  res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(source.file_name).replace(/'/g, '%27')}`)
+  res.setHeader('Cache-Control', 'private, no-store')
+  res.send(source.data)
 })
 invoiceRouter.post('/upload-and-audit', async (req, res) => {
   const data = await InvoiceService.ingestAndAudit(

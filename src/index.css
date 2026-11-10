@@ -205,3 +205,27 @@ label { font-size: .875rem; color: #c9ced8; }
 .site-cursor-glow { will-change:transform; }
 
 @media(max-width:380px) { .ws-nav>button { min-width:0; font-size:10px; gap:6px; padding-inline:6px; }.ws-nav>button svg { width:16px; height:16px; } }
+
+/* A focused review flow with the source always within reach. */
+.ws-guide { border:1px solid var(--ws-border,#28303c); border-radius:14px; padding:20px; margin-bottom:24px; background:#121820; }
+.ws-guide h2,.ws-original h3,.ws-extracted h3 { font-size:15px; font-weight:600; margin:0 0 12px; }
+.ws-guide ol { display:flex; gap:20px; padding:0; margin:12px 0; list-style:none; flex-wrap:wrap; }
+.ws-guide li { display:flex; gap:9px; align-items:center; color:#9ba5b3; font-size:13px; }
+.ws-guide li>span { display:grid; place-items:center; width:24px; height:24px; border:1px solid #384250; border-radius:50%; }
+.ws-guide .is-done { color:#a4dfce; }
+.ws-queue-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:20px; }
+.ws-dialog.ws-dialog-compare { width:min(1240px,calc(100vw - 32px)); max-width:1240px; }
+.ws-comparison { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:28px; align-items:start; }
+.ws-original { min-width:0; padding:16px; border:1px solid #303947; border-radius:12px; background:#111720; }
+.ws-original p { font-size:13px; color:#aab3c1; margin:12px 0; }
+.ws-original iframe { width:100%; height:65vh; border:0; background:white; }
+.ws-original img { width:100%; max-height:65vh; object-fit:contain; background:white; }
+.ws-original pre { white-space:pre-wrap; overflow-wrap:anywhere; font-size:12px; max-height:65vh; overflow:auto; }
+.ws-local-file { display:grid; gap:12px; font-size:13px; }
+.ws-local-file input { max-width:100%; }
+.ws-extracted { min-width:0; }
+@media(max-width:760px) { .ws-comparison { grid-template-columns:1fr; gap:20px; } .ws-original iframe { height:45vh; } .ws-guide ol { flex-direction:column; gap:12px; } .ws-queue-heading { align-items:flex-start; flex-direction:column; } }
+.ws-pdf-preview { overflow:auto; max-height:70vh; }
+.ws-pdf-preview canvas { max-width:100%; background:white; }
+.ws-pdf-controls { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12px; }
+.ws-pdf-controls button:disabled { opacity:.4; cursor:default; }

@@ -9,7 +9,7 @@ export const db = {
     )
     return rows.map((row) => row.data)
   },
-  async addInvoice(ownerId, record, validate) {
+  async addInvoice(ownerId, record, validate, source) {
     const client = await pool.connect()
     try {
       await client.query('BEGIN')
@@ -28,6 +28,10 @@ export const db = {
       await client.query(
         'INSERT INTO veyra_invoice_records(id, owner_id, data) VALUES ($1, $2, $3)',
         [record.id, ownerId, JSON.stringify(validated)]
+      )
+      if (source) await client.query(
+        'INSERT INTO veyra_invoice_documents(invoice_id, owner_id, file_name, file_type, data) VALUES ($1,$2,$3,$4,$5)',
+        [record.id, ownerId, source.fileName, source.fileType, source.bytes]
       )
       await client.query('COMMIT')
       return validated
@@ -72,6 +76,13 @@ export const db = {
     } finally {
       client.release()
     }
+  },
+  async getInvoiceDocument(ownerId, id) {
+    const { rows } = await pool.query(
+      'SELECT d.file_name, d.file_type, d.data FROM veyra_invoice_documents d JOIN veyra_invoice_records i ON i.id=d.invoice_id WHERE d.invoice_id=$1 AND d.owner_id=$2 AND i.owner_id=$2',
+      [id, ownerId]
+    )
+    return rows[0] || null
   },
   async addWaitlist(email) {
     const { rows } = await pool.query(

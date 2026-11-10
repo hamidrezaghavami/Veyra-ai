@@ -2,7 +2,6 @@ import { randomUUID } from 'node:crypto'
 import { db } from '../db/store.js'
 import { AuditEngine } from '../audit/engine.js'
 import { GeminiClient } from '../gemini/client.js'
-import { invoiceFields, uploadSchema } from '../validation.js'
 
 const history = (actor, action, note) => ({
   id: randomUUID(),
@@ -14,6 +13,8 @@ const history = (actor, action, note) => ({
 export const InvoiceService = {
   getAll: (ownerId) => db.getInvoices(ownerId),
   async ingestAndAudit(ownerId, actor, input) {
+    const bytes = Buffer.from(input.data, 'base64')
+    if (!bytes.length || bytes.length > 2_800_000) throw Object.assign(new Error('Choose a document smaller than 2.8 MB.'), { status: 400 })
     const extracted = await GeminiClient.extractInvoiceData(input)
     const record = {
       ...extracted.fields,
@@ -48,7 +49,7 @@ export const InvoiceService = {
         )
       )
       return candidate
-    })
+    }, { fileName: input.fileName, fileType: input.fileType, bytes })
   },
   async approve(ownerId, id, actor, note) {
     return db.updateInvoice(ownerId, id, (item) => {

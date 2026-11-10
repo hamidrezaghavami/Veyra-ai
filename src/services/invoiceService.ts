@@ -3,6 +3,12 @@ export type { InvoiceRecord, AuditFlag, AuditAction, LineItem } from '../shared/
 import type { InvoiceRecord } from '../shared/types'
 export const invoiceService = {
   getAll: () => api<InvoiceRecord[]>('/invoices'),
+  async getDocument(id: string, signal: AbortSignal) {
+    const response = await fetch(`/api/invoices/${encodeURIComponent(id)}/document`, { signal, credentials: 'same-origin' })
+    if (response.status === 404) return null
+    if (!response.ok) throw new Error('Could not load the original document.')
+    return response.blob()
+  },
   async upload(file: File) {
     if (file.size > 2_800_000) throw new Error('Choose a document smaller than 2.8 MB.')
     const fileType = file.name.toLowerCase().endsWith('.json') ? 'application/json' : file.type
