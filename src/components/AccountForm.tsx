@@ -16,5 +16,6 @@ export function AccountForm({ signup = false }: { signup?: boolean }) {
           ? <SignUp routing="path" path="/sign-up" signInUrl="/sign-in" fallbackRedirectUrl="/account" />
           : <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" fallbackRedirectUrl="/account" />}
       </div>
+      <p className="mt-5 text-center text-sm"><a className="text-cyan-300 hover:underline" href={signup ? '/sign-in' : '/sign-up'}>{signup ? t('Sign In') : t('Create your Veyra account')}</a></p>
     </main><Footer /></div>
 }
