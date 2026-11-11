@@ -165,7 +165,7 @@ label { font-size: .875rem; color: #c9ced8; }
 .workspace button:disabled { cursor:not-allowed; opacity:.5; }
 .ws-skip { position:fixed; top:8px; left:8px; transform:translateY(-150%); z-index:100; padding:12px; background:#e8ecf2; color:#10141c; border-radius:8px; }.ws-skip:focus { transform:none; }
 .ws-sidebar { position:fixed; inset:0 auto 0 0; width:220px; display:flex; flex-direction:column; padding:32px 16px 20px; border-right:1px solid var(--ws-line); background:#0e1118; }
-.ws-brand { display:flex; align-items:center; gap:9px; padding:0 14px; width:fit-content; color:#f4f6fa; font-size:26px; font-weight:600; letter-spacing:-1.2px; text-decoration:none; }.ws-brand-dot { color:var(--ws-accent); margin-left:-8px; }.ws-brand-mark { background:var(--ws-accent); color:#11262a; font-size:18px; width:27px; height:27px; display:grid; place-items:center; border-radius:7px; font-weight:700; margin-right:2px; }
+.ws-brand { padding:0 14px; width:fit-content; }
 .ws-nav-caption { color:#8a93a3; font-size:10px; font-weight:500; letter-spacing:1.6px; text-transform:uppercase; margin:52px 14px 13px; }.ws-nav { display:grid; gap:5px; }.ws-nav>button { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:8px; color:#a9b0be; text-align:left; font-size:13px; border:1px solid transparent; }.ws-nav>button:hover { background:#171d27; color:#fff; }.ws-nav>button[aria-current] { background:#193035; color:#a5edf0; border-color:#254045; }.ws-nav-count { margin-left:auto; font-size:11px; padding:0 6px; border-radius:4px; background:#29434a; color:#c2f5f6; }
 .ws-sidebar-footer { margin-top:auto; padding:20px 12px 0; border-top:1px solid var(--ws-line); }.ws-account { display:flex; align-items:center; gap:10px; min-width:0; }.ws-account>div:last-child { min-width:0; }.ws-account span { display:block; font-size:12px; color:#dee3ec; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:135px; }.ws-account small { color:#8c96a7; font-size:10px; }.ws-signout { display:flex; align-items:center; gap:9px; color:#929cad; font-size:12px; margin-top:20px; padding:6px 0; }.ws-signout:hover { color:#fff; }
 .ws-body { margin-left:220px; }.ws-topbar { height:64px; border-bottom:1px solid var(--ws-line); display:flex; justify-content:space-between; align-items:center; padding:0 40px; font-size:11px; }.ws-breadcrumb { color:#bac2d0; }.ws-breadcrumb>span { color:#535e70; padding:0 10px; }.ws-saved { display:flex; align-items:center; gap:7px; color:#8c96a7; }.ws-saved>span { width:5px; height:5px; border-radius:50%; background:#7bb9a5; }
@@ -238,13 +238,13 @@ body { background:#0b0e0d; }
 .surface-card { background:linear-gradient(160deg,#151b18ed,#0d1210f5); border-color:#ffffff12; box-shadow:0 12px 32px #0002,inset 0 1px 0 #ffffff04; }
 .site-atmosphere-wash { background:radial-gradient(ellipse at 72% 0%,#9ee6c50a,transparent 60%); }
 .site-cursor-glow { background:radial-gradient(circle,#9ee6c509,transparent 68%); }
-.veyra-wordmark { display:inline-flex; align-items:center; gap:9px; letter-spacing:-.8px; font-size:22px; }
-.veyra-wordmark::before { content:'v'; display:grid; place-items:center; width:27px; height:27px; border:1px solid #b8efda60; border-radius:9px 9px 3px 9px; background:#9ee6c5; color:#14271d; font-weight:700; font-size:18px; }
+.veyra-wordmark { display:inline-flex; align-items:center; gap:9px; color:#f5f8fa; font-size:clamp(18px,3vw,22px); font-weight:600; letter-spacing:-.7px; line-height:1.1; white-space:nowrap; text-decoration:none; }
+.veyra-ai { color:#a6d8ff; }
+.veyra-symbol { width:21px; height:20px; flex:none; background:#a6d8ff; clip-path:polygon(0 0,21% 0,50% 75%,79% 0,100% 0,59% 100%,41% 100%); }
 .veyra-hero-title { text-wrap:balance; }
 .veyra-hero-title::after { content:''; display:block; width:54px; height:3px; background:#9ee6c5; margin:28px auto 0; border-radius:2px; }
 .workspace { --ws-bg:#0c100e; --ws-panel:#131915; --ws-line:#28332c; --ws-muted:#a1afa6; --ws-accent:#9ee6c5; background:radial-gradient(ellipse at 100% 0%,#9ee6c506,transparent 50%),var(--ws-bg); color:#e9efeb; }
 .ws-sidebar { background:#101511; border-color:#29322c; }
-.ws-brand-mark { border-radius:9px 9px 3px 9px; background:#9ee6c5; color:#16291f; }
 .ws-nav>button[aria-current] { background:#1c3025; color:#b8efda; border-color:#33513f; }
 .ws-nav-count { background:#2c4938; color:#c2f0d8; }
 .ws-page-heading h1 { font-size:34px; font-weight:500; letter-spacing:-1.3px; }
