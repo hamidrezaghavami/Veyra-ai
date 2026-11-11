@@ -53,7 +53,7 @@ export function Footer() {
                 <a href="/#use-cases" className="hover:text-white transition-colors">{t("Use Cases")}</a>
               </li>
               <li>
-                <a href="/#pricing" className="hover:text-white transition-colors">{t("Pricing")}</a>
+                <a href="/pricing" className="hover:text-white transition-colors">{t("Pricing")}</a>
               </li>
               <li>
                 <a href="/#faq" className="hover:text-white transition-colors">{t("FAQ")}</a>
