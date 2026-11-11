@@ -1,3 +1,4 @@
+import invoicePreviewBackground from '../assets/invoice-preview-background.jpg'
 import { useLanguage } from '../context/LanguageContext'
 import { useState } from 'react'
 import { ArrowRight, CheckCircle2, AlertTriangle, FileText, Sparkles, ShieldCheck } from 'lucide-react'
@@ -73,7 +74,7 @@ export function Hero() {
         >
           {/* Invoice preview background */}
           <div className="relative h-44 sm:h-52 rounded-xl overflow-hidden mb-3 bg-[#101713]" id="invoice-preview">
-            <img src="/images/invoice-preview-background.jpg" alt="" width={1600} height={533} className="absolute inset-0 size-full object-cover object-[62%_50%]" />
+            <img src={invoicePreviewBackground} alt="" width={1600} height={533} className="absolute inset-0 size-full object-cover object-[62%_50%]" />
             <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,12,9,.48),transparent_40%,rgba(7,12,9,.84))]" />
             <div className="absolute inset-0 p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between">
