@@ -11,7 +11,7 @@ export function Navbar() {
 
   const [open, setOpen] = useState(false)
   const { data: session } = useSession()
-  const links = [['Features','/#features'],['Use Cases','/#use-cases'],['How It Works','/#how-it-works'],['Pricing','/#pricing'],['Blog','/blog'],['Changelog','/changelog']]
+  const links = [['Features','/#features'],['Use Cases','/#use-cases'],['How It Works','/#how-it-works'],['Pricing','/pricing'],['Blog','/blog'],['Changelog','/changelog']]
   return <header className="fixed top-0 inset-x-0 z-50 p-4"><nav aria-label={t("Main navigation")} className="max-w-6xl mx-auto rounded-2xl border border-white/10 bg-[#111713]/95 backdrop-blur-xl px-3 sm:px-5 py-3 flex items-center justify-between gap-2 sm:gap-4">
     <VeyraWordmark />
     <div className="hidden xl:flex items-center gap-5 text-sm text-neutral-300">{links.map(([name,href]) => <a key={href} href={href} className="hover:text-white">{t(name)}</a>)}</div>

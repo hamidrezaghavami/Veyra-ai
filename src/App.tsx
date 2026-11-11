@@ -11,6 +11,7 @@ import { lazy, Suspense } from 'react'
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(module => ({ default: module.DashboardPage })))
 const BlogPage = lazy(() => import('./pages/BlogPage').then(module => ({ default: module.BlogPage })))
 const BlogPostPage = lazy(() => import('./pages/BlogPostPage').then(module => ({ default: module.BlogPostPage })))
+const PricingPage = lazy(() => import('./pages/PricingPage').then(module => ({ default: module.PricingPage })))
 const ChangelogPage = lazy(() => import('./pages/ChangelogPage').then(module => ({ default: module.ChangelogPage })))
 const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(module => ({ default: module.PrivacyPolicyPage })))
 const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then(module => ({ default: module.TermsOfServicePage })))
@@ -23,6 +24,10 @@ function RouteSwitcher() {
 
   if (path === '/' || path === '') {
     return <HomePage />
+  }
+
+  if (path === '/pricing' || path === '/pricing/') {
+    return <PricingPage />
   }
 
   if (path === '/waitlist') {
