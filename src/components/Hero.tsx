@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { ArrowRight, CheckCircle2, AlertTriangle, FileText, Sparkles, ShieldCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useRouter } from '../context/RouterContext'
-import { ShaderBackground } from './ShaderBackground'
 import { LiquidButton } from './LiquidButton'
 
 export function Hero() {
@@ -65,16 +64,17 @@ export function Hero() {
         {/* Sub-hero Audience Proof */}
         <p className="mt-5 text-[13px] text-neutral-400 font-normal">{t("Built for freelancers, small businesses, and accounting teams")}</p>
 
-        {/* Hero Interactive Showcase Card (Surface 1 + Liquid Refraction + Shader) */}
+        {/* Hero Interactive Showcase Card */}
         <motion.div
           initial={{ opacity: 0, y: 25 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.4 }}
           className="mt-14 max-w-3xl mx-auto surface-card p-2 sm:p-3 relative overflow-hidden shadow-[0_30px_70px_rgba(0,0,0,0.7)] text-left"
         >
-          {/* Top Decorative Shader */}
-          <div className="relative h-44 sm:h-52 rounded-xl overflow-hidden mb-3">
-            <ShaderBackground variant="Large1" className="size-full" intensity={1.1} />
+          {/* Invoice preview background */}
+          <div className="relative h-44 sm:h-52 rounded-xl overflow-hidden mb-3 bg-[#101713]" id="invoice-preview">
+            <img src="/images/invoice-preview-background.jpg" alt="" width={1600} height={533} className="absolute inset-0 size-full object-cover object-[62%_50%]" />
+            <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,12,9,.48),transparent_40%,rgba(7,12,9,.84))]" />
             <div className="absolute inset-0 p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 px-3 py-1 rounded-full liquid-glass-secondary border border-white/15">
