@@ -72,10 +72,10 @@ export function BuiltForTeams() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
               whileHover={{ y: -4 }}
-              className="surface-card p-6 flex flex-col justify-between hover:border-[#21d2ed]/40 transition-all duration-300"
+              className="surface-card p-6 flex flex-col justify-between hover:border-[#9ee6c5]/40 transition-all duration-300"
             >
               <div>
-                <div className="size-10 rounded-xl bg-[#141824] border border-white/10 flex items-center justify-center text-[#21d2ed] mb-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)]">
+                <div className="size-10 rounded-xl bg-[#141824] border border-white/10 flex items-center justify-center text-[#9ee6c5] mb-6 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)]">
                   <item.icon className="size-5" />
                 </div>
                 <h3 className="text-lg font-medium text-white tracking-[-0.02em] mb-2.5">

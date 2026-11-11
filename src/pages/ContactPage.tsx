@@ -64,7 +64,7 @@ export function ContactPage() {
                     required
                     value={formData.firstName}
                     onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#21d2ed]"
+                    className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#9ee6c5]"
                   />
                 </div>
                 <div>
@@ -74,7 +74,7 @@ export function ContactPage() {
                     required
                     value={formData.lastName}
                     onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#21d2ed]"
+                    className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#9ee6c5]"
                   />
                 </div>
               </div>
@@ -87,7 +87,7 @@ export function ContactPage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#21d2ed]"
+                    className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#9ee6c5]"
                   />
                 </div>
                 <div>
@@ -96,7 +96,7 @@ export function ContactPage() {
                     type="text"
                     value={formData.company}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                    className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#21d2ed]"
+                    className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#9ee6c5]"
                   />
                 </div>
               </div>
@@ -109,7 +109,7 @@ export function ContactPage() {
                   placeholder={t("e.g. Enterprise pilot inquiry or API questions")}
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#21d2ed]"
+                  className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#9ee6c5]"
                 />
               </div>
 
@@ -120,7 +120,7 @@ export function ContactPage() {
                   required
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#21d2ed] resize-none"
+                  className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-3.5 py-2.5 text-[14px] text-white focus:outline-none focus:border-[#9ee6c5] resize-none"
                 />
               </div>
 

@@ -16,27 +16,16 @@ export function Hero() {
   return (
     <section className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        {/* Top Eyebrow Pill */}
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          whileHover={{ scale: 1.04, y: -1 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => navigate('/changelog')}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full liquid-glass-secondary border border-white/15 mb-8 cursor-pointer select-none"
-        >
-          <span className="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#21d2ed]/20 text-[#21d2ed] border border-[#21d2ed]/40">{t("NEW")}</span>
-          <span className="text-[13px] text-neutral-300">{t("Invoice and expense auditing with AI")}</span>
-          <ArrowRight className="size-3 text-[#21d2ed]" />
-        </motion.div>
+        <p className="inline-flex items-center gap-2 text-[12px] font-medium text-cyan-300 mb-7">
+          <ShieldCheck size={15} aria-hidden="true" />{t("Invoice and expense auditing with AI")}
+        </p>
 
         {/* Main Headline (60px/1.05/-0.04em) */}
         <motion.h1
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-4xl sm:text-6xl md:text-[66px] font-medium tracking-[-0.04em] text-white leading-[1.05] max-w-4xl mx-auto"
+          className="veyra-hero-title text-4xl sm:text-6xl md:text-[66px] font-medium tracking-[-0.04em] text-white leading-[1.05] max-w-4xl mx-auto"
         >{t("Your invoices, audited. ")}<br className="hidden sm:block" />{t("Your expenses, clear.")}</motion.h1>
 
         {/* Subtitle */}
@@ -89,7 +78,7 @@ export function Hero() {
             <div className="absolute inset-0 p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 px-3 py-1 rounded-full liquid-glass-secondary border border-white/15">
-                  <FileText className="size-3.5 text-[#21d2ed]" />
+                  <FileText className="size-3.5 text-[#9ee6c5]" />
                   <span className="text-[12px] font-mono text-white">{t("Example invoice · INV-2026-9812.pdf")}</span>
                 </div>
                 <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[11px] font-medium backdrop-blur-md">
@@ -137,7 +126,7 @@ export function Hero() {
                   }`}
                 >
                   <span>{t("Validation Checks")}</span>
-                  <span className="size-1.5 rounded-full bg-[#21d2ed]" />
+                  <span className="size-1.5 rounded-full bg-[#9ee6c5]" />
                 </motion.button>
               </div>
 

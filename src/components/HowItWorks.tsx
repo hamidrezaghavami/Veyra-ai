@@ -53,14 +53,14 @@ export function HowItWorks() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: idx * 0.15 }}
               whileHover={{ y: -5 }}
-              className="surface-card p-6 flex flex-col justify-between hover:border-[#21d2ed]/40 transition-all duration-300"
+              className="surface-card p-6 flex flex-col justify-between hover:border-[#9ee6c5]/40 transition-all duration-300"
             >
               <div>
                 <div className="flex items-center justify-between mb-8">
-                  <span className="text-[12px] font-mono uppercase tracking-widest text-[#21d2ed]">
+                  <span className="text-[12px] font-mono uppercase tracking-widest text-[#9ee6c5]">
                     {t(item.step)}
                   </span>
-                  <div className="size-9 rounded-xl bg-[#141824] border border-white/10 flex items-center justify-center text-[#21d2ed] shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)]">
+                  <div className="size-9 rounded-xl bg-[#141824] border border-white/10 flex items-center justify-center text-[#9ee6c5] shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)]">
                     <item.icon className="size-4" />
                   </div>
                 </div>
@@ -75,7 +75,7 @@ export function HowItWorks() {
 
               <div className="mt-8 pt-4 border-t border-white/5 flex items-center justify-between text-[11px] text-neutral-400">
                 <span>{t("Phase 0")}{idx + 1}</span>
-                <span className="font-mono text-[#21d2ed]">{t("100% Traceable")}</span>
+                <span className="font-mono text-[#9ee6c5]">{t("100% Traceable")}</span>
               </div>
             </motion.div>
           ))}

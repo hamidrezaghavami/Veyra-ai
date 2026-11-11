@@ -657,5 +657,14 @@
   "Previous page": "Önceki sayfa",
   "Next page": "Sonraki sayfa",
   "Page {page} of {total}": "Sayfa {page} / {total}",
-  "Could not preview this PDF. Download the original to open it.": "Bu PDF önizlenemedi. Açmak için orijinali indirin."
+  "Could not preview this PDF. Download the original to open it.": "Bu PDF önizlenemedi. Açmak için orijinali indirin.",
+  "Review findings": "İnceleme bulguları",
+  "{count} to check": "Kontrol edilecek: {count}",
+  "Checks passed": "Kontroller başarılı",
+  "The numbers reconcile. Compare the document before approving.": "Rakamlar tutarlı. Onaylamadan önce belgeyle karşılaştırın.",
+  "Compare this value": "Bu değeri karşılaştırın",
+  "Matching text highlighted on this page. Verify it against the field.": "Bu sayfadaki eşleşen metin vurgulandı. Alanla karşılaştırarak doğrulayın.",
+  "No exact text match on this page. Check other pages or compare visually.": "Bu sayfada tam metin eşleşmesi yok. Diğer sayfaları kontrol edin veya görsel olarak karşılaştırın.",
+  "Reading your document and checking the numbers": "Belgeniz okunuyor ve rakamlar kontrol ediliyor",
+  "Your review opens automatically when it’s ready.": "Hazır olduğunda inceleme otomatik olarak açılır."
 }

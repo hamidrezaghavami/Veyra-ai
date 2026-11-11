@@ -66,14 +66,14 @@ export function WhatWeDo() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: idx * 0.15 }}
               whileHover={{ y: -5 }}
-              className="surface-card p-2 sm:p-2.5 flex flex-col justify-between group hover:border-[#21d2ed]/40 transition-all duration-300"
+              className="surface-card p-2 sm:p-2.5 flex flex-col justify-between group hover:border-[#9ee6c5]/40 transition-all duration-300"
             >
               {/* Top Shader Preview with Visual Elements */}
               <div className="relative h-48 rounded-xl overflow-hidden mb-5">
                 <ShaderBackground variant={card.shaderVariant} className="size-full" />
                 <div className="absolute inset-0 p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between">
-                    <div className="size-8 rounded-lg bg-[#080a0f]/80 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#21d2ed]">
+                    <div className="size-8 rounded-lg bg-[#080a0f]/80 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#9ee6c5]">
                       <card.icon className="size-4" />
                     </div>
                     <span className="text-[11px] font-mono px-2 py-0.5 rounded bg-black/40 text-neutral-300 border border-white/5">
@@ -89,7 +89,7 @@ export function WhatWeDo() {
 
               {/* Text Description */}
               <div className="p-4 pt-1">
-                <h3 className="text-xl font-medium text-white tracking-[-0.02em] mb-2 group-hover:text-[#21d2ed] transition-colors">
+                <h3 className="text-xl font-medium text-white tracking-[-0.02em] mb-2 group-hover:text-[#9ee6c5] transition-colors">
                   {t(card.title)}
                 </h3>
                 <p className="text-[14px] text-[#b0b0b0] leading-[1.45]">

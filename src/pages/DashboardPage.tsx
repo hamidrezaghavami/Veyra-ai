@@ -1,3 +1,4 @@
+import { ReviewFindings } from '../components/ReviewFindings'
 import { OriginalDocument } from '../components/OriginalDocument'
 import { ReviewGuide } from '../components/ReviewGuide'
 import { reviewQueue } from '../shared/reviewQueue'
@@ -118,7 +119,7 @@ export function DashboardPage() {
       <div className="ws-page-heading"><div><p className="ws-eyebrow">{tab === 'upload' ? t('Step 1 of 3') : t('Your workspace')}</p><h1>{t(titles[tab][0])}</h1><p>{t(titles[tab][1])}</p></div>{tab !== 'upload' && <button className="ws-button ws-primary" disabled={busy} onClick={() => go('upload')}><Plus size={16} aria-hidden="true" />{t("Upload invoice")}</button>}</div>
       {error && <div role="alert" className="ws-alert"><AlertCircle size={18} aria-hidden="true" /><span>{t(error)}</span><button aria-label={t("Dismiss error")} onClick={() => setError('')}><X size={16} aria-hidden="true" /></button></div>}
       {notice && <p role="status" className="ws-notice"><Check size={16} aria-hidden="true" />{t(notice)}</p>}
-      {loading ? <div className="ws-loading" role="status">{t("Loading your invoices…")}</div> : <>
+      {loading ? <div className="ws-skeleton" role="status"><span className="sr-only">{t("Loading your invoices…")}</span><div className="ws-skeleton-stats">{[0,1,2].map(i=><span key={i} />)}</div><div className="ws-skeleton-table">{[0,1,2,3].map(i=><span key={i} />)}</div></div> : <>
         {(tab === 'invoices' || tab === 'review') && <>
           <ReviewGuide key={session.user.id} userId={session.user.id} invoices={invoices} opened={openedReview} onUpload={() => go('upload')} onReview={() => { if (queue[0] || invoices[0]) setSelected(queue[0] || invoices[0]) }} />
           {tab === 'review' && queue.length > 0 && <div className="ws-queue-heading"><p>{t(queue.length ? 'Invoices waiting for your decision: {count}' : 'You’re all caught up', { count: queue.length })}</p>{visible.length > 0 && <button className="ws-button ws-primary" onClick={() => setSelected(visible[0])}>{t('Review next invoice')} →</button>}</div>}
@@ -155,8 +156,15 @@ function ReviewDialog({ invoice, onClose, onSave }: {invoice: InvoiceRecord; onC
   const [error,setError] = useState('')
   const [editing,setEditing] = useState(false)
   const [draft,setDraft] = useState(invoice)
+  const [focusFinding, setFocusFinding] = useState(0)
+  const finding = invoice.flags[focusFinding]
+  const focusField = finding?.field
+  const focusLine = focusField === 'lineItems' ? invoice.lineItems.find(item => finding.message.includes(`“${item.description}”`)) : undefined
+  const focusValue = focusField === 'total' || focusField === 'subtotal' || focusField === 'taxAmount' || focusField === 'invoiceNumber'
+    ? invoice[focusField]
+    : focusLine?.description ?? null
   useEffect(() => { dialog.current?.showModal(); return () => dialog.current?.close() }, [])
-  useEffect(() => { setDraft(invoice); setNote(''); setEditing(false) }, [invoice])
+  useEffect(() => { setDraft(invoice); setNote(''); setEditing(false); setFocusFinding(0) }, [invoice])
   const submit = async (event:FormEvent) => {
     event.preventDefault(); if(pending)return
     setPending(true);setError('')
@@ -169,15 +177,15 @@ function ReviewDialog({ invoice, onClose, onSave }: {invoice: InvoiceRecord; onC
     finally { setPending(false) }
   }
   return <dialog ref={dialog} onCancel={event => { if(pending)event.preventDefault(); else onClose() }} aria-labelledby="invoice-review-title" className="ws-dialog ws-dialog-compare">
-    <div className="flex items-start justify-between gap-4 mb-5"><h2 id="invoice-review-title" className="text-2xl">{t("Review invoice")}</h2><button type="button" className="action-button" disabled={pending} onClick={onClose}>{t("Close")}</button></div>
-    <div className="ws-comparison"><OriginalDocument key={invoice.id} id={invoice.id} fileName={invoice.fileName} /><section className="ws-extracted" aria-label={t('Extracted details')}><h3>{t('Extracted details')}</h3>
-    <p className="text-neutral-400 mb-5">{invoice.vendor} · {invoice.invoiceNumber} · {money(invoice.total,invoice.currency)}</p>
+    <div className="ws-dialog-heading flex items-center justify-between gap-4 mb-5"><h2 id="invoice-review-title" className="text-2xl">{t("Review invoice")}</h2><button type="button" className="action-button" disabled={pending} onClick={onClose}>{t("Close")}</button></div>
+    <div className="ws-comparison"><OriginalDocument key={invoice.id} id={invoice.id} fileName={invoice.fileName} focusValue={focusValue} currency={invoice.currency} /><section className="ws-extracted" aria-label={t('Extracted details')}><h3>{t('Extracted details')}</h3>
+    <p className="text-neutral-400 mb-5">{invoice.vendor} · <span data-focused={focusField === 'invoiceNumber'}>{invoice.invoiceNumber}</span></p>
     <div className="ws-review-summary"><StatusBadge status={invoice.status} /><span>{invoice.flags.length ? `${invoice.flags.length} ${invoice.flags.length === 1 ? t('issue') : t('issues')} ${t('to check below')}` : t('Check the extracted details before approving.')}</span></div>
-    {invoice.flags.map(f => <p key={f.id} className="text-amber-200 border border-amber-400/20 rounded-lg p-3 mb-3">{t(f.message)}</p>)}
+    <ReviewFindings invoice={invoice} selected={focusFinding} onSelect={setFocusFinding} />
     <form onSubmit={submit} aria-busy={pending}>
       {editing ? <><p className="text-sm text-neutral-400 mb-4">{t("Corrections re-run validation and reset approval.")}</p><div className="grid sm:grid-cols-2 gap-4">{(['vendor','invoiceNumber','issueDate','dueDate','currency','subtotal','taxRate','taxAmount','total'] as const).map(field => <div key={field}><label htmlFor={`edit-${field}`}>{t(({vendor:'Vendor',invoiceNumber:'Invoice Number',issueDate:'Issue Date',dueDate:'Due Date',currency:'Currency',subtotal:'Subtotal',taxRate:'Tax Rate (Fraction)',taxAmount:'Tax Amount',total:'Total'})[field])}</label><input id={`edit-${field}`} className="form-input" type={typeof draft[field]==='number' ? 'number' : field.endsWith('Date') ? 'date' : 'text'} step="any" min={typeof draft[field]==='number' ? 0 : undefined} required value={draft[field]} onChange={e=>setDraft({...draft,[field]:typeof draft[field]==='number' ? Number(e.target.value) : e.target.value})}/></div>)}</div><h3 className="text-lg mt-6 mb-3">{t("Line Items")}</h3>{draft.lineItems.map((line,index) => <fieldset key={index} className="border border-white/10 p-3 rounded-xl mb-3"><legend className="text-sm">{t("Item ")}{index+1}</legend>{(['description','quantity','unitPrice','total'] as const).map(field => <div key={field}><label htmlFor={`line-${index}-${field}`}>{t(({description:'Description',quantity:'Quantity',unitPrice:'Unit Price',total:'Line Total'})[field])}</label><input id={`line-${index}-${field}`} className="form-input" type={field==='description' ? 'text' : 'number'} step="any" required min={field==='quantity' ? 0.000001 : field==='description' ? undefined : 0} value={line[field]} onChange={e=>setDraft({...draft,lineItems:draft.lineItems.map((l,j)=>j===index ? {...l,[field]:field==='description' ? e.target.value : Number(e.target.value)} : l)})} /></div>)}</fieldset>)}</> : <>
-        <dl className="grid grid-cols-2 gap-3 mb-5"><dt>{t("Issue Date")}</dt><dd>{date(invoice.issueDate)}</dd><dt>{t("Due Date")}</dt><dd>{date(invoice.dueDate)}</dd><dt>{t("Subtotal")}</dt><dd>{money(invoice.subtotal,invoice.currency)}</dd><dt>{t("Tax")}</dt><dd>{money(invoice.taxAmount,invoice.currency)} ({new Intl.NumberFormat(locale,{style:'percent',maximumFractionDigits:2}).format(invoice.taxRate)})</dd></dl>
-        <div className="overflow-x-auto"><table className="w-full text-sm mb-6"><caption className="sr-only">{t("Invoice line items")}</caption><thead><tr><th scope="col" className="text-left p-2">{t("Description")}</th><th scope="col" className="p-2">{t("Quantity")}</th><th scope="col" className="p-2">{t("Unit Price")}</th><th scope="col" className="p-2">{t("Total")}</th></tr></thead><tbody>{invoice.lineItems.map(l=><tr key={l.id} className="border-t border-white/10"><td className="p-2">{l.description}</td><td className="p-2 text-right">{l.quantity}</td><td className="p-2 text-right">{money(l.unitPrice,invoice.currency)}</td><td className="p-2 text-right">{money(l.total,invoice.currency)}</td></tr>)}</tbody></table></div>
+        <div className="ws-review-total" data-focused={focusField === 'total'}><span>{t('Total')}</span><strong>{money(invoice.total,invoice.currency)}</strong></div><dl className="grid grid-cols-2 gap-3 mb-5"><dt>{t("Issue Date")}</dt><dd>{date(invoice.issueDate)}</dd><dt>{t("Due Date")}</dt><dd>{date(invoice.dueDate)}</dd><dt>{t("Subtotal")}</dt><dd data-focused={focusField === 'subtotal'}>{money(invoice.subtotal,invoice.currency)}</dd><dt>{t("Tax")}</dt><dd data-focused={focusField === 'taxAmount'}>{money(invoice.taxAmount,invoice.currency)} ({new Intl.NumberFormat(locale,{style:'percent',maximumFractionDigits:2}).format(invoice.taxRate)})</dd></dl>
+        <div className="overflow-x-auto"><table className="w-full text-sm mb-6"><caption className="sr-only">{t("Invoice line items")}</caption><thead><tr><th scope="col" className="text-left p-2">{t("Description")}</th><th scope="col" className="p-2">{t("Quantity")}</th><th scope="col" className="p-2">{t("Unit Price")}</th><th scope="col" className="p-2">{t("Total")}</th></tr></thead><tbody>{invoice.lineItems.map(l=><tr key={l.id} data-focused={l.id === focusLine?.id} className="border-t border-white/10"><td className="p-2">{l.description}</td><td className="p-2 text-right">{l.quantity}</td><td className="p-2 text-right">{money(l.unitPrice,invoice.currency)}</td><td className="p-2 text-right">{money(l.total,invoice.currency)}</td></tr>)}</tbody></table></div>
         <label htmlFor="review-action">{t("Review decision")}</label><select id="review-action" className="form-input" value={action} onChange={e=>setAction(e.target.value as typeof action)}><option value="approve">{t("Approve")}</option><option value="reject">{t("Reject")}</option><option value="flag">{t("Flag for Review")}</option></select>
         <label htmlFor="review-note" className="block mt-4">{t("Review note ")}{action==='approve' && !invoice.flags.length ? t('(optional)') : t('(required)')}</label><textarea id="review-note" className="form-input" rows={3} maxLength={2000} required={action!=='approve'||invoice.flags.length>0} minLength={action==='approve'&&invoice.flags.length>0 ? 10 : 1} value={note} onChange={e=>setNote(e.target.value)} />
       </>}

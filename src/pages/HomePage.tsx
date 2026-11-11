@@ -18,7 +18,7 @@ export function HomePage() {
   const { t } = useLanguage()
 
   return (
-    <div className="min-h-screen bg-transparent text-white overflow-x-hidden selection:bg-[#21d2ed]/30 selection:text-white relative">
+    <div className="min-h-screen bg-transparent text-white overflow-x-hidden selection:bg-[#9ee6c5]/30 selection:text-white relative">
       {/* Living Atmospheric Background */}
 
       <a href="#main-content" className="skip-link">{t("Skip to content")}</a>

@@ -10,7 +10,7 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/audit.test.ts tests/i18n.test.ts tests/review-queue.test.ts",
+    "test": "tsx --test tests/audit.test.ts tests/i18n.test.ts tests/review-queue.test.ts tests/document-match.test.ts",
     "db:migrate": "tsx scripts/migrate.ts",
     "test:integration": "tsx --test tests/integration.test.ts",
     "test:backend": "node --no-experimental-strip-types --test tests/backend-runtime.test.js"

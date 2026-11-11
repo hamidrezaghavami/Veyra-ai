@@ -25,7 +25,7 @@ export function Footer() {
           {/* Brand Info (2 cols) */}
           <div className="md:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="size-7 rounded-md bg-[#18181b] border border-white/10 flex items-center justify-center p-1 text-[#21d2ed]">
+              <div className="size-7 rounded-md bg-[#18181b] border border-white/10 flex items-center justify-center p-1 text-[#9ee6c5]">
                 <svg viewBox="0 0 24 24" fill="none" className="size-full">
                   <path
                     d="M4 6L12 18L20 6"

@@ -39,7 +39,7 @@ export function BlogPostPage({ slug }: { slug: string }) {
         {/* Article Header */}
         <header className="mb-12">
           <div className="flex items-center gap-4 text-[13px] text-neutral-400 mb-4">
-            <span className="px-3 py-0.5 rounded-full liquid-glass-secondary border-[#21d2ed]/30 text-[#21d2ed] font-medium text-[12px]">
+            <span className="px-3 py-0.5 rounded-full liquid-glass-secondary border-[#9ee6c5]/30 text-[#9ee6c5] font-medium text-[12px]">
               {t(post.category)}
             </span>
             <span>{t(post.date)}</span>
@@ -59,7 +59,7 @@ export function BlogPostPage({ slug }: { slug: string }) {
         {/* Hero Decorative Banner */}
         <div className={`h-48 sm:h-64 rounded-2xl bg-gradient-to-br ${post.coverGradient} border border-white/10 mb-12 flex items-center justify-center p-6 relative overflow-hidden`}>
           <div className="text-center">
-            <span className="text-[12px] uppercase font-mono tracking-widest text-[#21d2ed] block mb-2">{t("Veyra Operational Architecture")}</span>
+            <span className="text-[12px] uppercase font-mono tracking-widest text-[#9ee6c5] block mb-2">{t("Veyra Operational Architecture")}</span>
             <div className="text-2xl font-medium text-white tracking-tight">{t("Continuous Financial Intelligence")}</div>
           </div>
         </div>
@@ -84,8 +84,8 @@ export function BlogPostPage({ slug }: { slug: string }) {
           ))}
 
           {/* Key Takeaway Callout */}
-          <div className="surface-card p-6 border-l-4 border-l-[#21d2ed] rounded-r-xl my-8">
-            <div className="text-[12px] font-mono uppercase tracking-wider text-[#21d2ed] mb-1">{t("Key Takeaway")}</div>
+          <div className="surface-card p-6 border-l-4 border-l-[#9ee6c5] rounded-r-xl my-8">
+            <div className="text-[12px] font-mono uppercase tracking-wider text-[#9ee6c5] mb-1">{t("Key Takeaway")}</div>
             <p className="text-white text-[15px] font-normal italic">
               "{t(post.content.summary)}"
             </p>
@@ -95,7 +95,7 @@ export function BlogPostPage({ slug }: { slug: string }) {
         {/* Author & Share Footer */}
         <div className="mt-16 pt-8 border-t border-white/[0.08] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-full bg-[#18181c] border border-white/10 flex items-center justify-center text-[#21d2ed] font-medium text-[13px]">{t("KC")}</div>
+            <div className="size-10 rounded-full bg-[#18181c] border border-white/10 flex items-center justify-center text-[#9ee6c5] font-medium text-[13px]">{t("KC")}</div>
             <div>
               <div className="text-[14px] font-medium text-white">{t("Kadir Calik")}</div>
               <div className="text-[12px] text-neutral-400">{t("Founder & Product Architect, Veyra AI")}</div>
