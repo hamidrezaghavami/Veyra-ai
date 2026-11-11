@@ -1,7 +1,7 @@
 import { useLanguage } from '../context/LanguageContext'
 import { FileSearch, ShieldAlert, LineChart } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { ShaderBackground } from './ShaderBackground'
+import { FeatureArtwork } from './FeatureArtwork'
 
 export function WhatWeDo() {
   const { t } = useLanguage()
@@ -11,7 +11,7 @@ export function WhatWeDo() {
       title: 'Extract invoice details',
       desc: 'Upload a PDF or image. AI reads vendors, dates, line items, taxes, and totals, turning documents into structured records.',
       icon: FileSearch,
-      shaderVariant: 'Small1' as const,
+      artwork: 'scan' as const,
       preview: {
         badge: 'OCR Ingestion',
         meta: 'Vendor · Date · 12 Line Items · Tax %',
@@ -21,7 +21,7 @@ export function WhatWeDo() {
       title: 'Flag financial errors',
       desc: 'Check for duplicate invoices, incorrect totals, missing information, and tax inconsistencies before approval.',
       icon: ShieldAlert,
-      shaderVariant: 'Small2' as const,
+      artwork: 'audit' as const,
       preview: {
         badge: 'Audit Checks',
         meta: 'Duplicate detection · Math verification · VAT rules',
@@ -31,7 +31,7 @@ export function WhatWeDo() {
       title: 'Understand your spending',
       desc: 'Track expenses by vendor and category. Ask your AI assistant questions and get answers grounded in your records.',
       icon: LineChart,
-      shaderVariant: 'Small3' as const,
+      artwork: 'spending' as const,
       preview: {
         badge: 'Spend Intelligence',
         meta: 'Trends · Category allocations · Natural-language queries',
@@ -56,7 +56,7 @@ export function WhatWeDo() {
           <h2 className="text-3xl sm:text-5xl font-medium tracking-[-0.04em] text-white leading-[1.05]">{t("Less invoice admin. ")}<br />{t("More financial clarity.")}</h2>
         </motion.div>
 
-        {/* 3-Column Shader Cards Grid with Staggered Slide In */}
+        {/* Feature cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {cards.map((card, idx) => (
             <motion.div
@@ -68,9 +68,9 @@ export function WhatWeDo() {
               whileHover={{ y: -5 }}
               className="surface-card p-2 sm:p-2.5 flex flex-col justify-between group hover:border-[#9ee6c5]/40 transition-all duration-300"
             >
-              {/* Top Shader Preview with Visual Elements */}
+              {/* Feature illustration */}
               <div className="relative h-48 rounded-xl overflow-hidden mb-5">
-                <ShaderBackground variant={card.shaderVariant} className="size-full" />
+                <FeatureArtwork kind={card.artwork} />
                 <div className="absolute inset-0 p-4 flex flex-col justify-between">
                   <div className="flex items-center justify-between">
                     <div className="size-8 rounded-lg bg-[#080a0f]/80 backdrop-blur-md border border-white/10 flex items-center justify-center text-[#9ee6c5]">
