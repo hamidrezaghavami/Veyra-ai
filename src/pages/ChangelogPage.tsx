@@ -28,7 +28,7 @@ export function ChangelogPage() {
           {CHANGELOG_ITEMS.map((item) => (
             <div key={item.version} className="relative pl-12 sm:pl-16">
               {/* Timeline marker */}
-              <div className="absolute left-3 sm:left-5 top-1 size-4 rounded-full bg-[#111113] border-2 border-[#21d2ed] -translate-x-1/2 shadow-[0_0_10px_rgba(33,210,237,0.5)]" />
+              <div className="absolute left-3 sm:left-5 top-1 size-4 rounded-full bg-[#111113] border-2 border-[#9ee6c5] -translate-x-1/2 shadow-[0_0_10px_rgba(33,210,237,0.5)]" />
 
               <motion.div
                 whileHover={{ y: -3 }}
@@ -36,7 +36,7 @@ export function ChangelogPage() {
                 className="surface-card p-6 sm:p-8 hover:border-white/20 transition-all shadow-xl"
               >
                 <div className="flex flex-wrap items-center gap-3 mb-3">
-                  <span className="text-[12px] font-mono font-semibold px-2.5 py-0.5 rounded-full liquid-glass-secondary text-[#21d2ed] border border-[#21d2ed]/40">
+                  <span className="text-[12px] font-mono font-semibold px-2.5 py-0.5 rounded-full liquid-glass-secondary text-[#9ee6c5] border border-[#9ee6c5]/40">
                     {item.version}
                   </span>
                   <span className="text-[13px] text-neutral-400">{t(item.date)}</span>
@@ -53,7 +53,7 @@ export function ChangelogPage() {
                 <div className="space-y-2.5 pt-4 border-t border-white/5">
                   {item.highlights.map((h, i) => (
                     <div key={i} className="flex items-start gap-2.5 text-[13px] text-neutral-300">
-                      <span className="size-1.5 rounded-full bg-[#21d2ed] shrink-0 mt-2" />
+                      <span className="size-1.5 rounded-full bg-[#9ee6c5] shrink-0 mt-2" />
                       <span>{t(h)}</span>
                     </div>
                   ))}

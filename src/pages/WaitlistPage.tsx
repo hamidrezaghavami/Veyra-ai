@@ -60,7 +60,7 @@ export function WaitlistPage() {
                     placeholder={t("name@company.com")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-4 py-3 text-[14px] text-white placeholder-neutral-500 focus:outline-none focus:border-[#21d2ed]"
+                    className="w-full bg-[#141824]/80 border border-white/10 rounded-xl px-4 py-3 text-[14px] text-white placeholder-neutral-500 focus:outline-none focus:border-[#9ee6c5]"
                   />
                 </div>
 
@@ -86,7 +86,7 @@ export function WaitlistPage() {
                   <CheckCircle2 className="size-6" />
                 </div>
                 <h3 className="text-xl font-medium text-white">{t("You’re on the waitlist!")}</h3>
-                <p className="text-[14px] text-[#b0b0b0]">{t("Your registration number is ")}<span className="text-[#21d2ed] font-mono font-medium">#{position}</span>{t(". Updates will be associated with ")}<span className="text-white">{email}</span>.
+                <p className="text-[14px] text-[#b0b0b0]">{t("Your registration number is ")}<span className="text-[#9ee6c5] font-mono font-medium">#{position}</span>{t(". Updates will be associated with ")}<span className="text-white">{email}</span>.
                 </p>
                 <div className="pt-3">
                   <LiquidButton

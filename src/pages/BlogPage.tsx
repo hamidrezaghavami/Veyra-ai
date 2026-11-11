@@ -66,7 +66,7 @@ export function BlogPage() {
               placeholder={t("Search guides...")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-[#141824]/80 border border-white/10 rounded-full pl-9 pr-3 py-1.5 text-[13px] text-white focus:outline-none focus:border-[#21d2ed]"
+              className="w-full bg-[#141824]/80 border border-white/10 rounded-full pl-9 pr-3 py-1.5 text-[13px] text-white focus:outline-none focus:border-[#9ee6c5]"
             />
           </div>
         </div>
@@ -84,7 +84,7 @@ export function BlogPage() {
               <div>
                 {/* Visual Header */}
                 <div className={`h-40 rounded-xl bg-gradient-to-br ${post.coverGradient} border border-white/5 p-5 flex flex-col justify-between mb-5`}>
-                  <span className="self-start text-[11px] font-medium uppercase tracking-wider px-2.5 py-0.5 rounded-full liquid-glass-secondary text-[#21d2ed] border border-[#21d2ed]/30">
+                  <span className="self-start text-[11px] font-medium uppercase tracking-wider px-2.5 py-0.5 rounded-full liquid-glass-secondary text-[#9ee6c5] border border-[#9ee6c5]/30">
                     {t(post.category)}
                   </span>
                   <div className="flex items-center gap-4 text-[12px] text-neutral-400">
@@ -99,7 +99,7 @@ export function BlogPage() {
                   </div>
                 </div>
 
-                <h2 className="text-xl sm:text-2xl font-medium text-white tracking-[-0.03em] leading-snug group-hover:text-[#21d2ed] transition-colors mb-3">
+                <h2 className="text-xl sm:text-2xl font-medium text-white tracking-[-0.03em] leading-snug group-hover:text-[#9ee6c5] transition-colors mb-3">
                   {t(post.title)}
                 </h2>
                 <p className="text-[14px] text-[#b0b0b0] leading-[1.5]">
@@ -107,7 +107,7 @@ export function BlogPage() {
                 </p>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-1.5 text-[13px] font-medium text-white group-hover:text-[#21d2ed] transition-colors">
+              <div className="mt-6 pt-4 border-t border-white/5 flex items-center gap-1.5 text-[13px] font-medium text-white group-hover:text-[#9ee6c5] transition-colors">
                 <span>{t("Read article")}</span>
                 <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" />
               </div>

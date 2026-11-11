@@ -59,7 +59,7 @@ export function Faq() {
                   onClick={() => toggle(idx)}
                   className="w-full flex items-center justify-between text-left group cursor-pointer"
                 >
-                  <span className="text-[17px] font-medium text-white group-hover:text-[#21d2ed] transition-colors pr-4">
+                  <span className="text-[17px] font-medium text-white group-hover:text-[#9ee6c5] transition-colors pr-4">
                     {t(item.q)}
                   </span>
                   <div className="size-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center shrink-0 text-[#b0b0b0] group-hover:text-white transition-colors">

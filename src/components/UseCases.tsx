@@ -112,7 +112,7 @@ export function UseCases() {
                 exit={{ opacity: 0, x: 15 }}
                 transition={{ duration: 0.35, ease: 'easeOut' }}
               >
-                <div className="text-[12px] uppercase tracking-wider text-[#21d2ed] font-medium mb-3">
+                <div className="text-[12px] uppercase tracking-wider text-[#9ee6c5] font-medium mb-3">
                   0{activeTab + 1} · {t(current.label)}
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-medium text-white tracking-[-0.03em] leading-tight mb-4">
@@ -198,7 +198,7 @@ export function UseCases() {
                     <div className="space-y-3 bg-[#080a0f]/90 backdrop-blur-md p-4 rounded-xl border border-white/10">
                       <div className="flex items-center justify-between pb-2 border-b border-white/5 text-[12px]">
                         <span className="text-white font-medium">{t("Expense Analytics · Q4 2026")}</span>
-                        <span className="text-[#21d2ed] font-mono">{t("$42,910 Total Audited")}</span>
+                        <span className="text-[#9ee6c5] font-mono">{t("$42,910 Total Audited")}</span>
                       </div>
                       <div className="grid grid-cols-3 gap-2 text-[11px] text-center">
                         <div className="p-2.5 rounded-lg bg-white/5">
@@ -223,7 +223,7 @@ export function UseCases() {
 
                   {activeTab === 3 && (
                     <div className="space-y-3 bg-[#080a0f]/90 backdrop-blur-md p-4 rounded-xl border border-white/10">
-                      <div className="flex items-center gap-2 text-[12px] text-[#21d2ed]">
+                      <div className="flex items-center gap-2 text-[12px] text-[#9ee6c5]">
                         <MessageSquare className="size-3.5" />
                         <span className="font-medium">{t("AI Financial Assistant")}</span>
                       </div>

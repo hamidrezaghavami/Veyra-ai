@@ -12,7 +12,7 @@ export function DesignSystemPage() {
     { name: 'Dark/Background', hex: '#080a0f', rgb: 'rgb(8, 10, 15)', usage: 'Deep obsidian page canvas' },
     { name: 'Dark/Surface 1', hex: '#111113', rgb: 'rgb(17, 17, 19)', usage: 'Cards & main panels (16px radius)' },
     { name: 'Dark/Surface 2', hex: '#141416', rgb: 'rgb(20, 20, 22)', usage: 'Insets inside cards (12px radius)' },
-    { name: 'Dark/Accent', hex: '#21d2ed', rgb: 'rgb(33, 210, 237)', usage: 'Eyebrows, active tabs, focus states' },
+    { name: 'Dark/Accent', hex: '#9ee6c5', rgb: 'rgb(33, 210, 237)', usage: 'Eyebrows, active tabs, focus states' },
     { name: 'Dark/Border', hex: 'rgba(255,255,255,0.06)', rgb: '1px solid hairline', usage: 'Card outlines & divider lines' },
     { name: 'Text/Primary', hex: '#ffffff', rgb: 'rgb(255, 255, 255)', usage: 'Headings & primary labels' },
     { name: 'Text/Secondary', hex: '#b0b0b0', rgb: 'rgb(176, 176, 176)', usage: 'Body copy & card descriptions' },
@@ -79,7 +79,7 @@ export function DesignSystemPage() {
                   style={{ backgroundColor: c.hex.startsWith('#') ? c.hex : '#111113' }}
                 />
                 <div className="text-[14px] font-medium text-white">{t(c.name)}</div>
-                <div className="text-[12px] font-mono text-[#21d2ed]">{c.hex}</div>
+                <div className="text-[12px] font-mono text-[#9ee6c5]">{c.hex}</div>
                 <div className="text-[11px] text-neutral-400 mt-1">{t(c.usage)}</div>
               </div>
             ))}

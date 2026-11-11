@@ -71,16 +71,16 @@ export function Comparison() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="surface-card p-6 sm:p-8 border-[#21d2ed]/40 relative overflow-hidden shadow-[0_20px_50px_rgba(33,210,237,0.12)] bg-gradient-to-b from-[#141824] to-[#0e121a]"
+            className="surface-card p-6 sm:p-8 border-[#9ee6c5]/40 relative overflow-hidden shadow-[0_20px_50px_rgba(33,210,237,0.12)] bg-gradient-to-b from-[#141824] to-[#0e121a]"
           >
             <div className="flex items-center gap-2 mb-6">
               <span className="text-sm font-medium text-white flex items-center gap-2">
-                <span className="size-2 rounded-full bg-[#21d2ed]" />{t("With Veyra AI")}</span>
+                <span className="size-2 rounded-full bg-[#9ee6c5]" />{t("With Veyra AI")}</span>
             </div>
             <ul className="space-y-4">
               {veyra.map((item) => (
                 <li key={item} className="flex items-start gap-3 text-[14px] text-white">
-                  <div className="size-5 rounded-full bg-[#21d2ed]/20 border border-[#21d2ed]/40 flex items-center justify-center shrink-0 mt-0.5 text-[#21d2ed]">
+                  <div className="size-5 rounded-full bg-[#9ee6c5]/20 border border-[#9ee6c5]/40 flex items-center justify-center shrink-0 mt-0.5 text-[#9ee6c5]">
                     <Check className="size-3" />
                   </div>
                   <span>{t(item)}</span>
