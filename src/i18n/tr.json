@@ -673,5 +673,14 @@
   "Pay once a year.": "Yılda bir ödeme.",
   "Pricing to be announced": "Fiyatlar daha sonra duyurulacak",
   "Both options include invoice extraction, review, and spending insights. Paid plans are coming soon.": "Her iki seçenekte de fatura bilgilerinin çıkarılması, inceleme ve harcama analizi bulunur. Ücretli planlar yakında sunulacak.",
-  "View plans": "Planları görüntüle"
+  "View plans": "Planları görüntüle",
+  "Choose monthly or annual billing. Paid plans are coming soon.": "Aylık veya yıllık faturalandırmayı seçin. Ücretli planlar yakında sunulacak.",
+  "Billing period": "Faturalandırma dönemi",
+  "Billed monthly": "Aylık faturalandırılır",
+  "Billed annually": "Yıllık faturalandırılır",
+  "Features included": "Dahil olan özellikler",
+  "AI invoice extraction": "Yapay zekâ ile fatura bilgilerini çıkarma",
+  "Invoice review and audit history": "Fatura inceleme ve denetim geçmişi",
+  "Spending insights": "Harcama analizi",
+  "AI invoice assistant": "Yapay zekâ fatura asistanı"
 }
