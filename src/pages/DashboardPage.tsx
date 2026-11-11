@@ -1,3 +1,4 @@
+import { VeyraWordmark } from '../components/VeyraWordmark'
 import { ReviewFindings } from '../components/ReviewFindings'
 import { OriginalDocument } from '../components/OriginalDocument'
 import { ReviewGuide } from '../components/ReviewGuide'
@@ -108,7 +109,7 @@ export function DashboardPage() {
   return <div className="workspace">
     <a href="#workspace-main" className="ws-skip">{t("Skip to content")}</a>
     <aside className="ws-sidebar">
-      <a href="/" className="ws-brand"><span className="ws-brand-mark" aria-hidden="true">{t("v")}</span>{t("veyra")}<span className="ws-brand-dot">.</span></a>
+      <VeyraWordmark className="ws-brand" />
       <p className="ws-nav-caption">{t("Workspace")}</p>
       <nav aria-label={t("Workspace")} className="ws-nav">{navigation.map(({key,label,icon: Icon}) => <button key={key} aria-current={(tab === key || key === 'invoices' && tab === 'upload') ? 'page' : undefined} onClick={() => go(key)}><Icon size={18} strokeWidth={1.7} aria-hidden="true" /><span>{t(label)}</span>{key === 'review' && reviewCount > 0 && <span className="ws-nav-count" aria-label={`${reviewCount} ${t('need review')}`}>{reviewCount}</span>}</button>)}</nav>
       <div className="ws-sidebar-footer"><div className="ws-account"><UserButton /><div><span>{session.user.name}</span><small>{t("Personal workspace")}</small></div></div><LanguageSwitch /><button className="ws-signout" onClick={async () => { try { await signOut({ redirectUrl: '/sign-in' }); setInvoices([]); setSelected(null) } catch { setError('Could not sign out. Please try again.') } }}><LogOut size={15} aria-hidden="true" />{t("Sign out")}</button></div>
